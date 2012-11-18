@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+	<meta charset="utf-8">
+	<title>TALN - TP 1 : Découpage en mots, loi de Zipf et évaluation</title>
+	<!-- Bootstrap -->
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link href="../commons/css/bootstrap.min.css" rel="stylesheet" media="screen">
+	<link href="../commons/css/bootstrap-responsive.css" rel="stylesheet">
+	<style>
+		.sidenav {
+			width: 240px;
+			margin: 30px 0pt 0pt;
+			padding: 0pt;
+			background-color: rgb(255,255,255);
+			border-radius: 6px 6px 6px 6px;
+			box-shadow: 0pt 1px 4px rgba(0,0,0,0.067);
+		}
+		.sidenav > li {
+			line-height: 20px;
+		}
+		.sidenav > li > a {
+			display: block;
+			margin: 0pt 0pt -1px;
+			padding: 8px 14px;
+			border: 1px solid rgb(229,229,229);
+		}
+		.sidenav .icon-chevron-right {
+			float: right;
+			margin-top: 2px;
+			margin-right: -6px;
+			opacity: 0.25;
+		}
+		.footer {
+			padding: 70px 0pt;
+			margin-top: 70px;
+			border-top: 1px solid rgb(229,229,229);
+			background-color: rgb(245,245,245);
+		}
+	</style>
+</head>
+<body data-spy="scroll" data-target=".navbar">
+	<div class="container-fluid">
+		<h1>TALN - TP 1 : Découpage en mots, loi de Zipf et évaluation sur corpus.</h1>
+		<div class="row-fluid">
+			<div class="span3">
+				<!--Sidebar content-->
+				<ul class="nav nav-list sidenav affix-top" data-spy="affix" data-offset-top="50">
+					<li><a href="#workspace">
+						<i class="icon-chevron-right"></i>
+						Environnement de travail
+					</a></li>
+					<li><a href="#corpus">
+						<i class="icon-chevron-right"></i>
+						Préparation du corpus
+					</a></li>
+					<li><a href="#regexp">
+						<i class="icon-chevron-right"></i>
+						Découpage en mots par règles
+					</a></li>
+					<li><a href="#eval">
+						<i class="icon-chevron-right"></i>
+						Évaluation
+					</a></li>
+					<li><a href="#stats">
+						<i class="icon-chevron-right"></i>
+						Découpage en mots par statistiques
+					</a></li>
+					<li><a href="#application">
+						<i class="icon-chevron-right"></i>
+						Mise en application
+					</a></li>
+				</ul>
+			</div>
+			<div class="span7">
+
+				<!-- SYNOPSIS -->
+<p class="lead">L'objectif de cette séance est de vous faire découvrir les deux grandes approches du <abbr title="Traitement Automatique des Langues">TAL</abbr> autour d'une des tâches les plus fondamentales, le découpage en mots. Cette exploration nous permettra également d'introduire les notions de corpus et d'évaluation.</p>
+
+				<!-- SECTION 1 - WORKSPACE -->
+<a name="workspace"></a>
+<h2>Mise en place de l'environnement de travail</h2>
+
+<p>Cette séance et les suivantes seront réalisées avec le langage Python.</p>
+<blockquote>
+	<p>Python est un langage de programmation multi-paradigme. Il favorise la programmation impérative structurée et orientée objet. Il est doté d'un typage dynamique fort, d'une gestion automatique de la mémoire par ramasse-miettes et d'un système de gestion d'exceptions ; il est ainsi similaire à Perl, Ruby, Scheme, Smalltalk et Tcl.</p>
+	<small><a href="http://fr.wikipedia.org/wiki/Python_%28langage%29">Wikipedia</a></small>
+</blockquote>
+<p>Historiquement les talistes ont travaillé avec <a href="http://fr.wikipedia.org/wiki/Perl_%28langage%29">le langage Perl</a> qui a été originalement conçu pour l'extraction d'informations depuis des fichiers textes. Le choix de Python est à la fois personnel mais se justifie également par les nombreuses bibliothèques scientifiques disponibles dont notamment <a href="http://nltk.org/"><abbr title="Natural Language Toolkit">nltk</abbr></a> et <a href="http://scikit-learn.org/stable/">sklearn</a> que nous utiliserons.</p>
+
+<p>L'écriture des scripts Python s'effectue facilement dans n'importe quel éditeur de texte qui offre une bonne coloration syntaxique et éventuellement de la complétion de code. Pour vérifier la version de Python installée sur votre machine, lancez un interpréteur dans un terminal :</p>
+<pre class="prettyprint">
+$ python
+Python 2.7.3rc2 (default, Apr 22 2012, 22:30:17) 
+[GCC 4.6.3] on linux2
+Type "help", "copyright", "credits" or "license" for more information.
+>>>
+</pre>
+
+<p>Les ressources telles que l'énoncé du cours et les exemples de code sont disponibles sur <a href="https://github.com/grdscarabe/nlp-lessons">ce dépôt github</a>. Vous pouvez en récupérer le contenu avec git (comme illustré ci-dessous) ou bien directement <a href="https://github.com/grdscarabe/nlp-lessons/archive/master.zip">en téléchargeant la branche au format Zip</a>.</p>
+<pre class="prettyprint">
+git clone https://github.com/grdscarabe/nlp-lessons.git
+</pre>
+
+				<!-- SECTION 2 - CORPUS -->
+<a name="corpus"></a>
+<h2>Préparation du corpus</h2>
+
+<p>En <abrr title="Traitement Automatique des Langues">TAL</abbr>, le travail commence presque toujours par la constitution d'un corpus.</p>
+<blockquote>
+<p>Les corpus sont des outils indispensables et précieux en traitement automatique du langage naturel. Ils permettent en effet d'extraire un ensemble d'information utile pour des traitements statistiques.</p>
+<p>D'un point de vue informatif, ils permettent d'extraire des tendances et notamment de construire des ensembles de n-grammes.</p>
+<p>D'un point de vue méthodologique, ils apportent une objectivité nécessaire à la validation scientifique en traitement automatique du langage naturel. L'information n'est plus empirique, elle est vérifiée par le corpus. Il est donc possible de s'appuyer sur des corpus (à condition qu'ils soient bien formés) pour formuler et vérifier des hypothèses scientifiques.</p>
+<small><a href="http://fr.wikipedia.org/wiki/Corpus#Le_corpus_dans_la_science">Wikipedia</a></small>
+</blockquote>
+
+<p>Nous ne dérogerons pas à la tendance dans cette séance. Toutefois afin de gagner du temps, un corpus brute vous est fourni. Vous le trouverez à la racine du dépôt dans le répertoire <code>corpus/wikinews</code>. Comme son nom l'indique, il a été construit à partir du site <a href="http://fr.wikinews.org/wiki/Main_Page">Wikinews</a>. Le corpus est composé de plusieurs documents aux formats <abbr title="HyperText Markup Language">HTML</abbr> (extension <emph>.html</emph>) et texte (extension <emph>.txt</emph>) : les fichiers textes sont des transcriptions en texte brute des fichiers <abbr title="HyperText Markup Language">HTML</abbr> de même nom.</p>
+
+<p>La première étape de votre travail va être d'annoter ce corpus pour l'évaluation d'un découpage en mots. L'objectif d'une telle tâche et de passer d'un texte présenté sous la forme d'une longue chaîne de caractères à une liste de sous-chaînes de caractères correspondant chacune à un mot.</p>
+
+<p>La notion de mot n'est pas réellement arrêtée en linguistique puisque le mot n'a ni réalité phonétique (contractions lors de la prononciation, ...), ni réalité sémantique (mots composés, contractions d'articles, ...). La réalité du mot est principalement graphique (écriture) et l'on se contente bien souvent de définir un mot comme un groupe de symboles graphiques séparés par des «blancs».</p>
+
+<p class="text-warning"><strong>Votre premier travail va consister à vous répartir au sein du groupe différents documents du corpus (ceux au format texte) et à découper leur contenu en mots. Dans ce but, vous utiliserez l'espace classique pour marquer la séparation entre deux mots.</strong></p>
+
+Par exemple, étant donné cet extrait du fichier <code>44618.txt</code> :
+<pre class="prettyprint">
+10 juillet 2012. – La Wikipédia en russe est aujourd'hui en grève : quiconque tentant de consulter un article tombera sur un message disant «Imaginez un monde sans connaissance libre».
+Il s'agit d'un signe de protestation contre le projet de loi n°89417-6
+</pre>
+Vous devriez l'annoter pour obtenir le découpage suivant :
+<pre class="prettyprint">
+10 juillet 2012 . – La Wikipédia en russe est aujourd'hui en grève : quiconque tentant de consulter un article tombera sur un message disant « Imaginez un monde sans connaissance libre » . Il s' agit d' un signe de protestation contre le projet de loi n° 89417-6
+</pre>
+
+				<!-- SECTION 3 - REGEXP -->
+<a name="regexp"></a>
+<h2>Découpage en mots à l'aide de règles</h2>
+
+<p>La première grande famille de méthode utilisée en <abbr title="Traitement Automatique des Langues">TAL</abbr> est celle de l'écriture de règles sur la base d'observations en corpus. Dans cette démarche, les expressions rationnelles fournissent souvent un bon moyen d'écrire mais également d'appliquer les règles.</p>
+
+<p>En Python, les expressions rationnelles ne sont pas disponibles par défaut, il est nécessaire d'importer le module <code>re</code>. La façon d'exprimer les expressions rationnelles reste très similaire à ce qui se fait en Perl. La documentation du module <code>re</code> est directement <a href="http://docs.python.org/2/library/re.html">consultable en ligne</a>.</p>
+
+<p>Le fichier <code>tp1/example1.py</code> vous montre comment extraire les mots d'un texte à l'aide d'une expression régulière :</p>
+<pre class="prettyprint linenum">
+# Lecture du contenu du fichier
+import codecs
+
+fh = codecs.open("../corpus/wikinews/44530.txt", "r", "utf-8")
+content = fh.read()
+fh.close()
+
+# Extract words
+import re
+
+regexp = re.compile("\w+", re.U)
+for word in regexp.findall(content):
+	print word
+</pre>
+<p>Vous pouvez lancer le script en mode interactif, de sorte que vous vous retrouviez dans l'interpréteur Python une fois le script exécuté et que vous puissiez ainsi accéder au contexte d'exécution :</p>
+<pre class="prettyprint">
+cd nlp-lessons/tp1
+python -i example1.py
+</pre>
+
+<p class="text-warning"><strong>Sur la base des annotations effectuées sur le sous ensemble du corpus, proposez des expressions régulières permettant de découper un texte en mots. Implémentez ensuite votre tokeniseur sous la forme d'un script Python et faites le s'exécuter sur le corpus.</strong></p>
+<p>Repartez du code proposé dans le fichier <code>regexp-tokenizer.py</code>.</p>
+
+				<!-- SECTION 4 - ÉVALUATION -->
+<a name="eval"></a>
+<h2>Évaluation du découpage automatique</h2>
+
+<p>Lorsque l'on commence à expérimenter des méthodes automatiques, la question d'évaluer ces méthodes se pose rapidement. Une bonne évaluation nécessite :</p>
+<ul>
+	<li>des données de référence auxquelles confronter les données calculées automatiquement</li>
+	<li>des métriques qui mesurent le taux de succès et d'erreur pour la tâche</li>
+</ul>
+
+<p>Nous allons employer une méthode d'évaluation classiquement utilisée dans les tâches de catégorisation qui a l'avantage d'être simple à comprendre et à mettre en œuvre. La méthode consiste à classer les mots produits par le tokeniseur en quatre catégories :</p>
+<dl>
+	<dt>les vrais positifs (VP)</dt>
+	<dd>les mots identifiés par le tokeniseur et qui sont également présents dans les données de référence</dd>
+	<dt>les faux positifs (FP)</dt>
+	<dd>les mots identifiés par le tokeniseur mais qui ne sont pas présents dans les données de référence</dd>
+	<dt>les vrais négatifs (VN)</dt>
+	<dd>les mots non identifiés par le tokeniseur et qui ne sont pas non plus présents dans les données de référence (toujours vide dans notre cas)</dd>
+	<dt>les faux négatifs (FN)</dt>
+	<dd>les mots non identifiés par le tokeniseur mais qui sont présents dans les données de référence</dd>
+</dl>
+<p>Cette répartition en catégorie nous permet d'utiliser deux métriques extrêmement classiques :<p>
+<dl>
+	<dt>la précision = <abbr title="vrais positifs">VP</abbr> / (<abbr title="vrais positifs">VP</abbr> + <abbr title="faux positifs">FP</abbr>)</dt>
+	<dd>la proportion de mots que le tokeniseur a identifié correctement</dd>
+	<dt>le rappel = <abbr title="vrais positifs">VP</abbr> / (<abbr title="vrais positifs">VP</abbr> + <abbr title="faux positifs">FN</abbr>)</dt>
+	<dd>la proportion de mots que le tokeniseur n'a pas réussi à identifier</dd>
+</dl>
+
+<p class="text-warning"><strong>Réalisez l'évaluation de votre tokeniseur en utilisant cette méthode. Il vous est nécessaire en premier lieu d'avoir des données de référence pour les comparer à la sortie de votre tokeniseur. Adaptez vos expressions rationnelles de manière à améliorer les performances de votre tokeniseur.</strong></p>
+
+<p>Le script <code>eval.py</code> implémente le framework décrit précédemment, il prend simplement en entrée deux fichiers :</p>
+<ul>
+	<li>le découpage en mots calculé par votre tokeniseur</li>
+	<li>le découpage de référence</li>
+</ul>
+
+Par exemple en utilisant l'annotation de référence <code>corpus/wikinews/45789-tokref.txt</code> :
+<pre class="prettyprint">
+python -i eval.py sortie.txt ../corpus/wikinews/45789-tokref.txt
+Precision: 0.9524
+Recall: 0.8368
+>>> fp
+[u'e', u'2', u'15', u'h', u'Cl\xe9ac', u'h', u'2', u'e', u"c'", u'est']
+>>> fn
+[u':', u',', u',', u'.', u'\u2013', u'2e', u',', u',', u',', u'.', u',', u',', u',', u'.', u'(', u')', u',', u',', u',', u',', u'.', u'15h', u',', u',', u'Cl\xe9ac\xb4h', u'2e', u'.', u':', u'\xab', u',', u'.', u'.', u'.', u',', u'.', u',', u"c'est", u'...', u'\xbb']
+</pre>
+
+				<!-- SECTION 5 - STATS -->
+<a name="stats"></a>
+<h2>Découpage en mots par statistiques</h2>
+
+				<!-- SECTION 6 - APPLICATION -->
+<a name="application"></a>
+<h2>Mise en application</h2>
+
+<p>Maintenant que nous disposons d'un tokeniseur en mots digne de ce nom, nous allons pouvoir l'utiliser pour mettre en évidence <a href="http://fr.wikipedia.org/wiki/Loi_de_Zipf">la loi de Zipf</a>. La loi de Zipf est une observation empirique qui prévoit que dans un texte, la fréquence d'occurrence <emph>f(n)</emph> d'un mot soit liée à son rang <emph>n</emph> dans l'ordre des fréquences par une loi de la forme <emph>f(n) = K / n (K constante)</emph>. Tournée autrement : un texte est constitué de peu de mots très fréquents et de beaucoup de mots peu fréquents.</p>
+
+<p class="text-warning"><strong>Cherchez à observer pour des textes conséquents que vous pourrez trouver sur <a href="http://www.gutenberg.org/browse/languages/fr">le site du projet Gutenberg</a>.</strong></p>
+
+			</div>
+		</div>
+	</div>
+	<footer class="footer">
+		<div class="container">
+			<div class="span8">
+				<dl>
+					<dt>Corpus, code, ...</dt>
+					<dd><a href="https://github.com/grdscarabe/nlp-lessons">https://github.com/grdscarabe/nlp-lessons</a></dd>
+					<dt>Lectures</dt>
+					<dd><a href="http://www.fabienpoulard.info">Blog de l'auteur</a></dd>
+				</dl>
+			</div>
+			<div class="span3">
+				<address>
+					<strong>Fabien Poulard</strong><br>
+					Dictanova SAS<br>
+					2, chemin de la Houssinière<br/>
+					44300 Nantes</br>
+					<a href="mailto:fpoulard@dictanova.com">fpoulard@dictanova.com</a>
+				</address>
+			</div>
+		</div>
+	</footer>
+	<!-- JS -->
+	<script src="http://code.jquery.com/jquery-latest.js"></script>
+	<script src="../commons/js/bootstrap.min.js"></script>
+</body>
+</html>
+
+
