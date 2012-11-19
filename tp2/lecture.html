@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+	<meta charset="utf-8">
+	<title>TALN - TP 2 : Découpage statistique en mots.</title>
+	<!-- Bootstrap -->
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link href="../commons/css/bootstrap.min.css" rel="stylesheet" media="screen">
+	<link href="../commons/css/bootstrap-responsive.css" rel="stylesheet">
+	<style>
+		.sidenav {
+			width: 240px;
+			margin: 30px 0pt 0pt;
+			padding: 0pt;
+			background-color: rgb(255,255,255);
+			border-radius: 6px 6px 6px 6px;
+			box-shadow: 0pt 1px 4px rgba(0,0,0,0.067);
+		}
+		.sidenav > li {
+			line-height: 20px;
+		}
+		.sidenav > li > a {
+			display: block;
+			margin: 0pt 0pt -1px;
+			padding: 8px 14px;
+			border: 1px solid rgb(229,229,229);
+		}
+		.sidenav .icon-chevron-right {
+			float: right;
+			margin-top: 2px;
+			margin-right: -6px;
+			opacity: 0.25;
+		}
+		.footer {
+			padding: 70px 0pt;
+			margin-top: 70px;
+			border-top: 1px solid rgb(229,229,229);
+			background-color: rgb(245,245,245);
+		}
+	</style>
+</head>
+<body data-spy="scroll" data-target=".navbar">
+	<div class="container-fluid">
+		<h1>TALN - TP 1 : Découpage statistique en mots.</h1>
+		<div class="row-fluid">
+			<div class="span3">
+				<!--Sidebar content-->
+				<ul class="nav nav-list sidenav affix-top" data-spy="affix" data-offset-top="50">
+					<li><a href="#intro">
+						<i class="icon-chevron-right"></i>
+						Un peu de statistiques
+					</a></li>
+					<li><a href="#markov">
+						<i class="icon-chevron-right"></i>
+						Hypothèse de Markov
+					</a></li>
+					<li><a href="#viterbi">
+						<i class="icon-chevron-right"></i>
+						Algorithme de Viterbi
+					</a></li>
+					<li><a href="#eval">
+						<i class="icon-chevron-right"></i>
+						Évaluation
+					</a></li>
+					<li><a href="#application">
+						<i class="icon-chevron-right"></i>
+						Mise en application
+					</a></li>
+				</ul>
+			</div>
+			<div class="span7">
+
+				<!-- SYNOPSIS -->
+<p class="lead">L'objectif de cette séance est de vous faire découvrir une autre approche classique en <abbr title="Traitement Automatique des Langues">TAL</abbr> : l'apprentissage automatique de règles à l'aide de méthodes statistiques. Nous repartirons de la tâche de découpage en mots avec pour objectif d'apprendre automatiquement les règles que nous avons manuellement écrites dans la séance précédente.</p>
+
+				<!-- SECTION 1 - INTRO -->
+<a name="#intro"></a>
+<h2>Un peu de statistiques</h2>
+
+				<!-- SECTION 2 - MARKOV -->
+<a name="#markov"></a>
+<h2>Hypothèse de Markov</h2>
+
+				<!-- SECTION 3 - VITERBI -->
+<a name="#viterbi"></a>
+<h2>Algorithme de Viterbi</h2>
+
+				<!-- SECTION 4 - ÉVALUATION -->
+<a name="#eval"></a>
+<h2>Évaluation</h2>
+
+				<!-- SECTION 5 - APPLICATION -->
+<a name="#eval"></a>
+<h2>Mise en application</h2>
+
+<p>Maintenant que nous disposons d'un tokeniseur en mots digne de ce nom, nous allons pouvoir l'utiliser pour mettre en évidence <a href="http://fr.wikipedia.org/wiki/Loi_de_Zipf">la loi de Zipf</a>. La loi de Zipf est une observation empirique qui prévoit que dans un texte, la fréquence d'occurrence <emph>f(n)</emph> d'un mot soit liée à son rang <emph>n</emph> dans l'ordre des fréquences par une loi de la forme <emph>f(n) = K / n (K constante)</emph>. Tournée autrement : un texte est constitué de peu de mots très fréquents et de beaucoup de mots peu fréquents.</p>
+
+<p class="text-warning"><strong>Cherchez à observer pour des textes conséquents que vous pourrez trouver sur <a href="http://www.gutenberg.org/browse/languages/fr">le site du projet Gutenberg</a>.</strong></p>
+
+			</div>
+		</div>
+	</div>
+	<footer class="footer">
+		<div class="container">
+			<div class="span8">
+				<dl>
+					<dt>Corpus, code, ...</dt>
+					<dd><a href="https://github.com/grdscarabe/nlp-lessons">https://github.com/grdscarabe/nlp-lessons</a></dd>
+					<dt>Lectures</dt>
+					<dd><a href="http://www.fabienpoulard.info">Blog de l'auteur</a></dd>
+				</dl>
+			</div>
+			<div class="span3">
+				<address>
+					<strong>Fabien Poulard</strong><br>
+					Dictanova SAS<br>
+					2, chemin de la Houssinière<br/>
+					44300 Nantes</br>
+					<a href="mailto:fpoulard@dictanova.com">fpoulard@dictanova.com</a>
+				</address>
+			</div>
+		</div>
+	</footer>
+	<!-- JS -->
+	<script src="http://code.jquery.com/jquery-latest.js"></script>
+	<script src="../commons/js/bootstrap.min.js"></script>
+</body>
+</html>
+
+
