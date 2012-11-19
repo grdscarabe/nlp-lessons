@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 	<meta charset="utf-8">
-	<title>TALN - TP 1 : Découpage en mots, loi de Zipf et évaluation</title>
+	<title>TALN - TP 1 : Découpage en mots à l'aide de règles et évaluation</title>
 	<!-- Bootstrap -->
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link href="../commons/css/bootstrap.min.css" rel="stylesheet" media="screen">
@@ -41,7 +41,7 @@
 </head>
 <body data-spy="scroll" data-target=".navbar">
 	<div class="container-fluid">
-		<h1>TALN - TP 1 : Découpage en mots, loi de Zipf et évaluation sur corpus.</h1>
+		<h1>TALN - TP 1 : Découpage en mots à l'aide de règles et évaluation.</h1>
 		<div class="row-fluid">
 			<div class="span3">
 				<!--Sidebar content-->
@@ -62,10 +62,6 @@
 						<i class="icon-chevron-right"></i>
 						Évaluation
 					</a></li>
-					<li><a href="#stats">
-						<i class="icon-chevron-right"></i>
-						Découpage en mots par statistiques
-					</a></li>
 					<li><a href="#application">
 						<i class="icon-chevron-right"></i>
 						Mise en application
@@ -75,7 +71,7 @@
 			<div class="span7">
 
 				<!-- SYNOPSIS -->
-<p class="lead">L'objectif de cette séance est de vous faire découvrir les deux grandes approches du <abbr title="Traitement Automatique des Langues">TAL</abbr> autour d'une des tâches les plus fondamentales, le découpage en mots. Cette exploration nous permettra également d'introduire les notions de corpus et d'évaluation.</p>
+<p class="lead">L'objectif de cette séance est de vous faire découvrir une approche classique en <abbr title="Traitement Automatique des Langues">TAL</abbr> : l'écriture de règles à partir d'observations en corpus. Nous l'aborderons pour une tâche fondamentale : le découpage en mots, et mettrons en place une évaluation en conséquence.</p>
 
 				<!-- SECTION 1 - WORKSPACE -->
 <a name="workspace"></a>
@@ -114,13 +110,21 @@ git clone https://github.com/grdscarabe/nlp-lessons.git
 <small><a href="http://fr.wikipedia.org/wiki/Corpus#Le_corpus_dans_la_science">Wikipedia</a></small>
 </blockquote>
 
-<p>Nous ne dérogerons pas à la tendance dans cette séance. Toutefois afin de gagner du temps, un corpus brute vous est fourni. Vous le trouverez à la racine du dépôt dans le répertoire <code>corpus/wikinews</code>. Comme son nom l'indique, il a été construit à partir du site <a href="http://fr.wikinews.org/wiki/Main_Page">Wikinews</a>. Le corpus est composé de plusieurs documents aux formats <abbr title="HyperText Markup Language">HTML</abbr> (extension <emph>.html</emph>) et texte (extension <emph>.txt</emph>) : les fichiers textes sont des transcriptions en texte brute des fichiers <abbr title="HyperText Markup Language">HTML</abbr> de même nom.</p>
+<p>Nous ne dérogerons pas à la tendance dans cette séance. Toutefois afin de gagner du temps, un corpus brute vous est fourni. Vous le trouverez à la racine du dépôt dans le répertoire <code>corpus/wikinews</code>. Comme son nom l'indique, il a été construit à partir du site <a href="http://fr.wikinews.org/wiki/Main_Page">Wikinews</a>. Le corpus est divisé en plusieurs répertoires :</p>
+<dl>
+	<dt>le sous-répertoire <code>html/</code></dt>
+	<dd>il contient une version des documents du corpus au format <abbr title="HyperText Markup Language">HTML</abbr>.</dd>
+	<dt>le sous-répertoire <code>txt/</code></dt>
+	<dd>il contient une version des documents du corpus au format texte brute.</dd>
+	<dt>le sous-répertoire <code>tokens/</code></dt>
+	<dd>il contiendra les versions manuellement découpées en mots des documents pour servir de référence lors de l'évaluation.</dd>
+</dl>
 
-<p>La première étape de votre travail va être d'annoter ce corpus pour l'évaluation d'un découpage en mots. L'objectif d'une telle tâche et de passer d'un texte présenté sous la forme d'une longue chaîne de caractères à une liste de sous-chaînes de caractères correspondant chacune à un mot.</p>
+<p>La première étape de votre travail va être d'annoter les versions en texte brute des documents du corpus pour l'évaluation d'un découpage en mots. L'objectif d'une telle tâche et de passer d'un texte présenté sous la forme d'une longue chaîne de caractères à une liste de sous-chaînes de caractères correspondant chacune à un mot.</p>
 
 <p>La notion de mot n'est pas réellement arrêtée en linguistique puisque le mot n'a ni réalité phonétique (contractions lors de la prononciation, ...), ni réalité sémantique (mots composés, contractions d'articles, ...). La réalité du mot est principalement graphique (écriture) et l'on se contente bien souvent de définir un mot comme un groupe de symboles graphiques séparés par des «blancs».</p>
 
-<p class="text-warning"><strong>Votre premier travail va consister à vous répartir au sein du groupe différents documents du corpus (ceux au format texte) et à découper leur contenu en mots. Dans ce but, vous utiliserez l'espace classique pour marquer la séparation entre deux mots.</strong></p>
+<p class="text-warning"><strong>Votre premier travail va consister à vous répartir au sein du groupe différents documents du corpus et à découper leur contenu en mots. Dans ce but, vous utiliserez l'espace classique pour marquer la séparation entre deux mots.</strong></p>
 
 Par exemple, étant donné cet extrait du fichier <code>44618.txt</code> :
 <pre class="prettyprint">
@@ -145,7 +149,7 @@ Vous devriez l'annoter pour obtenir le découpage suivant :
 # Lecture du contenu du fichier
 import codecs
 
-fh = codecs.open("../corpus/wikinews/44530.txt", "r", "utf-8")
+fh = codecs.open("../corpus/wikinews/txt/44530.txt", "r", "utf-8")
 content = fh.read()
 fh.close()
 
@@ -202,9 +206,10 @@ python -i example1.py
 	<li>le découpage de référence</li>
 </ul>
 
-Par exemple en utilisant l'annotation de référence <code>corpus/wikinews/45789-tokref.txt</code> :
+Par exemple en utilisant l'annotation de référence <code>corpus/wikinews/tokens/45789.toks</code> :
 <pre class="prettyprint">
-python -i eval.py sortie.txt ../corpus/wikinews/45789-tokref.txt
+$ python regexp-tokenizer.py ../corpus/wikinews/txt/45789.txt > sortie.txt
+$ python -i eval.py sortie.txt ../corpus/wikinews/45789-tokref.txt
 Precision: 0.9524
 Recall: 0.8368
 >>> fp
@@ -212,10 +217,6 @@ Recall: 0.8368
 >>> fn
 [u':', u',', u',', u'.', u'\u2013', u'2e', u',', u',', u',', u'.', u',', u',', u',', u'.', u'(', u')', u',', u',', u',', u',', u'.', u'15h', u',', u',', u'Cl\xe9ac\xb4h', u'2e', u'.', u':', u'\xab', u',', u'.', u'.', u'.', u',', u'.', u',', u"c'est", u'...', u'\xbb']
 </pre>
-
-				<!-- SECTION 5 - STATS -->
-<a name="stats"></a>
-<h2>Découpage en mots par statistiques</h2>
 
 				<!-- SECTION 6 - APPLICATION -->
 <a name="application"></a>
