@@ -48,7 +48,7 @@
 				<ul class="nav nav-list sidenav affix-top" data-spy="affix" data-offset-top="50">
 					<li><a href="#intro">
 						<i class="icon-chevron-right"></i>
-						Un peu de statistiques
+						Un peu de probabilités
 					</a></li>
 					<li><a href="#markov">
 						<i class="icon-chevron-right"></i>
@@ -75,13 +75,112 @@
 
 				<!-- SECTION 1 - INTRO -->
 <a name="#intro"></a>
-<h2>Un peu de statistiques</h2>
+<h2>Un peu de probabilités</h2>
 
-L'approche étudiée lors de la précédente séance présentait une méthode de découpage en mots basée sur des règles écrites manuellement sur la base d'observations en corpus. Une telle approche a l'avantage de laisser le contrôle au développeur qui "comprend" les règles qu'il écrit. Pour autant, il est fastidieux d'identifier la totalité des règles permettant de prendre en compte les différents cas présentés dans le corpus. Les statistiques (et les probabilités) peuvent alors assister le développeur en permettant d'identifier automatiquement les règles à mettre en oeuvre.
+<p>Le travail sur corpus pour identifier des règles manuellement permet de profiter de notre compréhension intuitive de la structure de notre langue. Toutefois, cette compréhension intuitive n'aide pas toujours et l'observation en corpus est une tâche rapidement fastidieuse. Ainsi, l'identification de la totalité des règles permettant de prendre en compte les différents cas présentés dans le corpus n'est pas forcément possible, sans compter qu'un changement de domaine, de genre, de registre de langue, ... peut suffire à en remettre en cause une partie.</p>
+
+<p>Une autre approche largement mise en œuvre en <abbr title="Traitement Automatique des Langues">TAL</abbr> est celle de l'apprentissage automatique, qui consiste à faire émerger les règles par analyse statistique. L'hypothèse est que la machine, comme un enfant, pourrait apprendre le langage par essais-erreurs successifs sous réserve qu'un dispositif lui indique quand ses tentatives sont correctes ou non.</p>
+
+<h3>Terminologie</h3>
+
+<blockquote>
+<p>La statistique est un domaine des mathématiques qui possède une composante théorique ainsi qu'une composante appliquée. La composante théorique est proche de la théorie des probabilités et forme avec cette dernière, les sciences de l'aléatoire. La statistique plus appliquée est utilisée dans presque tous les domaines de l'activité humaine1 : ingénierie, management, économie, biologie, informatique, etc. Ces distinctions ne consistent pas à définir plusieurs domaines étanches. En effet, le traitement et l'interprétation des données ne peuvent se faire que lorsque celles-ci ont été collectées. La statistique possède des règles et des méthodes sur la collecte des données, pour que celles-ci puissent être correctement interprétées.</p>
+<small><a href="http://fr.wikipedia.org/wiki/Statistique">Wikipedia</a></small>
+</blockquote>
+
+<p>Premièrement, posons un peu les choses concernant ce que l'on appelle les «statistiques» :</p>
+<dl>
+	<dt>la statistique descriptive<dt>
+	<dd>branche des statistiques qui regroupe les techniques permettant de décrire un échantillon</dd>
+	<dt>la statistique mathématique</dt>
+	<dd>analyse des propriétés mathématiques des estimateurs</dd>
+	<dt>une statistique</dt>
+	<dd>une fonction de données</dd>
+	<dt>la théorie des probabilités (ou les probabilités)</dt>
+	<dd>l'étude mathématique des phénomènes caractérisés par le hasard et l'incertitude</dd>
+	<dt>la probabilité</dt>
+	<dd>une évaluation du caractère probable d'un évènement</dd>
+	<dt>une probabilité</dt>
+	<dd>une loi de mesure de probabilité (la précédente)</dd>
+</dl>
+<p>Un peu perturbant, non ? Retenez simplement que les termes font référence à de nombreux concepts et que pour la suite nous nous intéresserons à la statistique descriptive, aux lois de probabilités, et au calcul de probabilités (évaluation).</p>
+
+<p>Continuons avec quelques autres notions :</p>
+<dl>
+	<dt>une expérience aléatoire</dt>
+	<dd>action de produire une ou plusieurs observations</dd>
+	<dt>un univers</dt>
+	<dd>l'ensemble de tous les résultats possibles d'un expérience aléatoire</dd>
+	<dt>une observation (ou éventualité)</dt>
+	<dd>un des résultats possible de l'expérience aléatoire</dd>
+</dl>
+
+<p>Arrêtons-nous ici pour le moment concernant le cadre théorique et manipulons un petit peu en repartant de la base : le comptage...</p>
+
+<h3>Comptage de bigrammes caractères</h3>
+
+<p>Lorsque l'on commence à travailler sur des statistiques, il est primordial de se questionner sur la représentativité de la population. Le corpus utilisé dans la séance précédente est trop petit pour être considéré comme représentatif de la langue française par exemple. Nous allons donc travailler sur un autre corpus un peu plus représentatif basé sur des œuvres de Jules Verne (<code>corpus/jules-verne</code>) :</p>
+<ul>
+	<li>«20.000 lieux sous les mers» en <a href="http://www.gutenberg.org/ebooks/5097">français</a> et en <a href="http://www.gutenberg.org/ebooks/164">anglais</a></li>
+	<li>«Le tour du monde en 80 jours» en <a href="http://www.gutenberg.org/ebooks/3456">français</a>, en <a href="http://www.gutenberg.org/ebooks/103">anglais</a> et en <a href="http://www.gutenberg.org/ebooks/2154">anglais simplifié</a></li>
+</ul>
+
+<p class="text-warning"><strong>Écrivez un petit script Python qui compte le nombre d'occurrences des bigrammes caractères dans ces différents textes et qui exporte ces données au format CSV afin de les retraiter dans un tableur.</strong></p>
+<p class="text-warning"><strong>Calculez les valeurs suivantes pour les différents textes :</strong></p>
+<ul>
+	<li class="text-warning"><strong>Mode (valeur ayant la fréquence la plus élevée)</strong></li>
+	<li class="text-warning"><strong>Moyenne et médiane</strong></li>
+	<li class="text-warning"><strong>Distribution par classes de fréquence (représentation en histogrammes)</strong></li>
+</ul>
+
+<p class="text-warning"><strong>Réitérez en ignorant tous les caractères blancs.</strong></p>
+
+<h3>Distribution des bigrammes caractères</h3>
+
+<p>Nous pouvons estimer la distribution des bigrammes caractères à partir des nombres d'occurrences comptés. Ainsi, la probabilité de présence d'un bigramme correspond à son nombre d'occurrence dans le corpus sur le nombre total de bigrammes dans le corpus. Il s'agit de l'approche fréquentielle. Comme toute bonne distribution de probabilités la somme des probabilités de tous les bigrammes doit être égale à 1.</p>
+
+<p>Plus formellement, étant donné la distribution de probabilité <emph>p</emph> définie précédemment, soit une variable aléatoire <emph>W</emph>, <emph>p(W=w) = p(w)</emph> est la probabilité que le mot <emph>w</emph> soit affectée à cette variable.</p>
+
+<p class="text-warning"><strong>Calculez la distribution des bigrammes sur le texte de 20.000 lieux sous les mers en français, puis en anglais.</strong></p>
+
+<p>Une telle distribution de probabilité correspond à ce que l'on appelle un modèle de langue. De tels modèles peuvent être utilisés notamment pour estimer si un texte est écrit dans une langue ou une autre... ce que nous allons tester !</p>
+
+<p>Le principe est assez simple :</p>
+<ul>
+	<li>Soit <emph>pfr</emph> la distribution pour la langue française,</li>
+	<li>Soit <emph>pen</emph> la distribution pour la langue anglaise,</li>
+	<li>Soit <emph>T = {b1, b2, ..., bj}</emph> le texte en entrée défini comme une séquence de bigrammes caractères,</li>
+	<li><emph>pfr(T)=pfr(b1)*pfr(b2)*...pfr(bj)</emph> et <emph>pen(T)=pen(b1)*pen(b2)*...pen(bj)</emph></li>
+	<li>si <emph>pfr(T)>pen(T)</emph> alors le texte est plus probablement en français, sinon en anglais.</li>
+</ul>
+
+<p class="text-warning"><strong>Implémentez un petit script Python qui étant donnée une distribution en français et une seconde en anglais identifie la langue d'un texte que vous lui passez en entrée. Cherchez les limites de l'approche.</strong></p>
 
 				<!-- SECTION 2 - MARKOV -->
 <a name="#markov"></a>
 <h2>Hypothèse de Markov</h2>
+
+<h3>Probabilités conditionnelles</h3>
+
+<blockquote>
+<p>La notion de probabilité conditionnelle permet de tenir compte dans une prévision d'une information complémentaire. Par exemple, si je tire au hasard une carte d'un jeu, j'estime naturellement à une chance sur quatre la probabilité d'obtenir un cœur ; mais si j'aperçois un reflet rouge sur la table, je corrige mon estimation à une chance sur deux. Cette seconde estimation correspond à la probabilité d'obtenir un cœur sachant que la carte est rouge. Elle est conditionnée par la couleur de la carte ; donc, conditionnelle.</p>
+<small><a href="http://fr.wikipedia.org/wiki/Probabilit%C3%A9_conditionnelle">Wikipedia</a></small>
+</blockquote>
+
+<p>Lorsque nous appréhendons des actes langagiers dans la vie de tous les jours, nous prenons (<emph>a priori</emph>) naturellement en compte tout l'historique de notre expérience du langage pour le comprendre. Plus pragmatiquement, si vous discutez par courriel avec ami, vous pouvez être amené à regarder le contenu des échanges précédents pour comprendre le sens du dernier.</p>
+
+<p>Un texte peut être modélisé comme une séquence d'unités (caractères, mots, concepts, phrases, ...), chacune voyant sa présence dépendre de la présence des unités antérieures et ainsi de suite récursivement. En d'autres termes, la probabilité qu'une variable aléatoire soit égale à <emph>wj</emph> étant donné <emph>T = {w1, w2, ..., wj}</emph> est <emph>p(wj|w1, w2, ..., wj-1)</emph>.</p>
+
+<h3>Principe générale</h3>
+
+L'hypothèse de Markov consiste à dire que les probabilités de transitions ne dépendent que des n états précédents. En général, on se place à l'ordre n = 1, ce qui permet de ne considérer que l'état courant et l'état suivant.
+
+
+Principe d'indépendance
+
+<h3>Prédire le prochain caractère</h3>
+
+<h3>Probabilité d'apparition d'un caractère</h3>
 
 				<!-- SECTION 3 - VITERBI -->
 <a name="#viterbi"></a>
