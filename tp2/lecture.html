@@ -50,13 +50,13 @@
 						<i class="icon-chevron-right"></i>
 						Un peu de probabilités
 					</a></li>
-					<li><a href="#markov">
+					<li><a href="#languagemodel">
 						<i class="icon-chevron-right"></i>
-						Hypothèse de Markov
+						Modèles de langue
 					</a></li>
-					<li><a href="#viterbi">
+					<li><a href="#tokenize">
 						<i class="icon-chevron-right"></i>
-						Algorithme de Viterbi
+						Tokenisation statistique
 					</a></li>
 					<li><a href="#eval">
 						<i class="icon-chevron-right"></i>
@@ -74,7 +74,7 @@
 <p class="lead">L'objectif de cette séance est de vous faire découvrir une autre approche classique en <abbr title="Traitement Automatique des Langues">TAL</abbr> : l'apprentissage automatique de règles à l'aide de méthodes statistiques. Nous repartirons de la tâche de découpage en mots avec pour objectif d'apprendre automatiquement les règles que nous avons manuellement écrites dans la séance précédente.</p>
 
 				<!-- SECTION 1 - INTRO -->
-<a name="#intro"></a>
+<a name="intro"></a>
 <h2>Un peu de probabilités</h2>
 
 <p>Le travail sur corpus pour identifier des règles manuellement permet de profiter de notre compréhension intuitive de la structure de notre langue. Toutefois, cette compréhension intuitive n'aide pas toujours et l'observation en corpus est une tâche rapidement fastidieuse. Ainsi, l'identification de la totalité des règles permettant de prendre en compte les différents cas présentés dans le corpus n'est pas forcément possible, sans compter qu'un changement de domaine, de genre, de registre de langue, ... peut suffire à en remettre en cause une partie.</p>
@@ -115,9 +115,11 @@
 	<dd>un des résultats possible de l'expérience aléatoire</dd>
 </dl>
 
-<p>Arrêtons-nous ici pour le moment concernant le cadre théorique et manipulons un petit peu en repartant de la base : le comptage...</p>
+<p>Arrêtons-nous ici pour le moment concernant le cadre théorique et manipulons un petit peu en repartant de la base : les modèles de langue...</p>
 
-<h3>Comptage de bigrammes caractères</h3>
+				<!-- SECTION 2 - MODÈLES DE LANGUE -->
+<a name="languagemodel"></a>
+<h2>Modèles de langue</h2>
 
 <p>Lorsque l'on commence à travailler sur des statistiques, il est primordial de se questionner sur la représentativité de la population. Le corpus utilisé dans la séance précédente est trop petit pour être considéré comme représentatif de la langue française par exemple. Nous allons donc travailler sur un autre corpus un peu plus représentatif basé sur des œuvres de Jules Verne (<code>corpus/jules-verne</code>) :</p>
 <ul>
@@ -125,17 +127,12 @@
 	<li>«Le tour du monde en 80 jours» en <a href="http://www.gutenberg.org/ebooks/3456">français</a>, en <a href="http://www.gutenberg.org/ebooks/103">anglais</a> et en <a href="http://www.gutenberg.org/ebooks/2154">anglais simplifié</a></li>
 </ul>
 
-<p class="text-warning"><strong>Écrivez un petit script Python qui compte le nombre d'occurrences des bigrammes caractères dans ces différents textes et qui exporte ces données au format CSV afin de les retraiter dans un tableur.</strong></p>
-<p class="text-warning"><strong>Calculez les valeurs suivantes pour les différents textes :</strong></p>
-<ul>
-	<li class="text-warning"><strong>Mode (valeur ayant la fréquence la plus élevée)</strong></li>
-	<li class="text-warning"><strong>Moyenne et médiane</strong></li>
-	<li class="text-warning"><strong>Distribution par classes de fréquence (représentation en histogrammes)</strong></li>
-</ul>
+<ol class="text-warning">
+	<li><strong>Écrivez un petit script Python qui compte le nombre d'occurrences des bigrammes caractères dans ces différents textes et qui exporte ces données au format CSV afin de les retraiter dans un tableur.</strong></li>
+	<li><strong>Calculez les valeurs suivantes pour les différents textes : mode (valeur ayant la fréquence la plus élevée), moyenne et médiane.</strong></li>
+</ol>
 
-<p class="text-warning"><strong>Réitérez en ignorant tous les caractères blancs.</strong></p>
-
-<h3>Distribution des bigrammes caractères</h3>
+<h3>Distribution de bigrammes caractères</h3>
 
 <p>Nous pouvons estimer la distribution des bigrammes caractères à partir des nombres d'occurrences comptés. Ainsi, la probabilité de présence d'un bigramme correspond à son nombre d'occurrence dans le corpus sur le nombre total de bigrammes dans le corpus. Il s'agit de l'approche fréquentielle. Comme toute bonne distribution de probabilités la somme des probabilités de tous les bigrammes doit être égale à 1.</p>
 
@@ -143,60 +140,125 @@
 
 <p class="text-warning"><strong>Calculez la distribution des bigrammes sur le texte de 20.000 lieux sous les mers en français, puis en anglais.</strong></p>
 
-<p>Une telle distribution de probabilité correspond à ce que l'on appelle un modèle de langue. De tels modèles peuvent être utilisés notamment pour estimer si un texte est écrit dans une langue ou une autre... ce que nous allons tester !</p>
+<p>Les assemblages de lettre semblent intuitivement différer entre l'anglais et le français. Il y a donc fort à parier que la distribution des bigrammes caractères pour l'anglais diffère de celle pour le français. Pour estimer ces variations, nous pouvons employer une technique des statistiques descriptives : les déciles.</p>
+
+<blockquote>
+<p>Un décile est chacune des 9 valeurs qui divisent un jeu de données, triées selon une relation d'ordre, en 10 parts égales, de sorte que chaque partie représente 1/10 de l'échantillon de population</p>
+<small><a href="http://fr.wikipedia.org/wiki/D%C3%A9cile">Wikipedia</a></small>
+</blockquote>
+
+<p class="text-warning"><strong>Calculez les déciles des bigrammes caractères pour le français et l'anglais. Observez que la distribution du nombre de bigrammes par décile corrobore la loi de Zipf.</strong></p>
+
+<h3>Détection de la langue d'un texte</h3>
+
+<p>Le calcul de la distribution de probabilité des n-grammes caractères pour un corpus suffisamment représentatif d'une langue est un modèle de langue. De tels modèles sont utilisés pour deviner la langue dans laquelle est écrite un texte.</p>
 
 <p>Le principe est assez simple :</p>
 <ul>
 	<li>Soit <emph>pfr</emph> la distribution pour la langue française,</li>
 	<li>Soit <emph>pen</emph> la distribution pour la langue anglaise,</li>
-	<li>Soit <emph>T = {b1, b2, ..., bj}</emph> le texte en entrée défini comme une séquence de bigrammes caractères,</li>
+	<li>Soit <emph>T = {b1, b2, ..., bj}</emph> le texte à identifier défini comme une séquence de bigrammes caractères,</li>
 	<li><emph>pfr(T)=pfr(b1)*pfr(b2)*...pfr(bj)</emph> et <emph>pen(T)=pen(b1)*pen(b2)*...pen(bj)</emph></li>
 	<li>si <emph>pfr(T)>pen(T)</emph> alors le texte est plus probablement en français, sinon en anglais.</li>
 </ul>
 
 <p class="text-warning"><strong>Implémentez un petit script Python qui étant donnée une distribution en français et une seconde en anglais identifie la langue d'un texte que vous lui passez en entrée. Cherchez les limites de l'approche.</strong></p>
 
-				<!-- SECTION 2 - MARKOV -->
-<a name="#markov"></a>
-<h2>Hypothèse de Markov</h2>
+				<!-- SECTION 2 - TOKENISATION -->
+<a name="tokenize"></a>
+<h2>Tokenisation statistique</h2>
 
-<h3>Probabilités conditionnelles</h3>
+<p>Après cette mise en bouche sur les probabilités, revenons à notre tâche initiale : le découpage en mots d'un texte. On peut modéliser le problème de la façon suivante :</p>
+<ul>
+	<li>soit X la lettre courante, quelle est la probabilité que X marque la fin du mot en cours (ou le début d'un nouveau mot) ?</li>
+	<li>soit X la lettre courante, quelle est la probabilité que X ne marque pas la fin du mot en cours (ou le début d'un nouveau mot) ?</li>
+	<li>laquelle de ces deux probabilités est la plus élevée ?</li>
+</ul>
+
+<h3>Hypothèse de Markov</h3>
+
+<p>Lorsque nous appréhendons des actes langagiers dans la vie de tous les jours, nous prenons (<emph>a priori</emph>) naturellement en compte tout l'historique de notre expérience du langage pour le comprendre. Plus pragmatiquement, si vous discutez par courriel avec un ami, vous pouvez être amené à regarder le contenu des échanges précédents pour comprendre le sens du dernier.</p>
+
+<p>Si vous aviez à découper manuellement un texte en mots, vous regarderiez le texte dans son ensemble et feriez appelle à votre connaissance globale du langage (ce que l'on pourrait appeler le modèle). Vous décideriez alors de couper le texte à un endroit particulier pour former les mots sur la base du contexte de la coupe... en réalité vous faites ce travail continuellement sans vous en rendre compte. Ça vous est tellement naturel que vous êtes capables delefairesansmêmeutiliserlescaractèresblancs... dans une certaine mesure.</p>
+
+<p>Ainsi, si vous deviez choisir l'endroit où couper le segment <code>deuxmots</code>, vous évaluriez certainement les choses de la façon suivante :</p>
+<ol>
+	<li>couper après la première lettre pour former les mots <code>d</code> et <code>euxmots</code> ne semble pas correcte,</li>
+	<li>couper après la deuxième lettre pour former les mots <code>de</code> et <code>uxmots</code> non plus,</li>
+	<li>...</li>
+	<li>couper après la quatrième lettre pour former les mots <code>deux</code> et <code>mots</code> semble correcte,</li>
+	<li>couper après la cinquième lettre pour former les mots <code>deuxm</code> et <code>ots</code> ne semble pas correcte,</li>
+	<li>...</li>
+</ol>
+<p>Et au final vous retiendriez une coupe après la quatrième lettre comme la meilleure solution selon votre connaissance de la langue. Et s'il s'agissait d'un trèstrèstrèstrèslongtextequevousdeviezdécouper,procéderiez-vousdelamêmefaçon? Probablement pas, vous vous contenteriez de considérer une fenêtre réduite de lettres : c'est l'intuition derrière l'hypothèse Markov.</p>
+
+<p class="text-info"><strong>L'hypothèse de Markov est que les probabilités de transitions ne dépendent que des <emph>n</emph> états précédents et non de la totalité des états précédents. En d'autres termes, l'information apportée par une fenêtre couvrant tout le texte est négligemment plus importante que celle apportée par une fenêtre de taille réduite autour de l'élément observé.</strong></p>
+
+<h3>Formalisation du problème</h3>
+
+<p>Nous allons tenter de prédire si nous devons découper une chaîne de caractères en deux à un endroit particulier en nous basant uniquement sur l'information apportée par une fenêtre de quatre lettres autour de l'endroit considéré.</p>
+
+<p>Par exemple, soit le texte <code>je m'étonne</code>. Considérons un découpage après le cinquième caractère (<code>'</code>) en ne considérant qu'une fenêtre de quatre lettres autour, soit <code>m'</code> à gauche et <code>ét</code> à droite. Notre connaissance du français nous invite à couper en deux mots plutôt qu'à conserver en un seul. Et si vous deviez décider pour <code>d'</code> et <code>hu</code> ? Réponse en <a href="#answer">bas de page</a>.</p>
+
+<p>Nous allons utiliser la puissance des probabilités conditionnelles pour notre modèle.</p>
 
 <blockquote>
 <p>La notion de probabilité conditionnelle permet de tenir compte dans une prévision d'une information complémentaire. Par exemple, si je tire au hasard une carte d'un jeu, j'estime naturellement à une chance sur quatre la probabilité d'obtenir un cœur ; mais si j'aperçois un reflet rouge sur la table, je corrige mon estimation à une chance sur deux. Cette seconde estimation correspond à la probabilité d'obtenir un cœur sachant que la carte est rouge. Elle est conditionnée par la couleur de la carte ; donc, conditionnelle.</p>
 <small><a href="http://fr.wikipedia.org/wiki/Probabilit%C3%A9_conditionnelle">Wikipedia</a></small>
 </blockquote>
 
-<p>Lorsque nous appréhendons des actes langagiers dans la vie de tous les jours, nous prenons (<emph>a priori</emph>) naturellement en compte tout l'historique de notre expérience du langage pour le comprendre. Plus pragmatiquement, si vous discutez par courriel avec ami, vous pouvez être amené à regarder le contenu des échanges précédents pour comprendre le sens du dernier.</p>
+<p>Dans notre cas, nous allons conditionner le choix de couper une chaîne de caractère en deux à son contexte : les deux lettres à gauches et les deux lettres à droite de l'endroit considéré. Notre modélisation est donc la suivante :</p>
+<ul>
+	<li>Soit X la variable aléatoire prenant la valeur <code>couper</code> ou <code>ne pas couper</code>,</li>
+	<li>Soit W le contexte gauche et Y le contexte droit,</li>
+	<li><i>p(X=<code>couper</code>|W,Y)</i> et <i>p(X=<code>ne pas couper</code>|W,Y)</i></li>
+</ul>
 
-<p>Un texte peut être modélisé comme une séquence d'unités (caractères, mots, concepts, phrases, ...), chacune voyant sa présence dépendre de la présence des unités antérieures et ainsi de suite récursivement. En d'autres termes, la probabilité qu'une variable aléatoire soit égale à <emph>wj</emph> étant donné <emph>T = {w1, w2, ..., wj}</emph> est <emph>p(wj|w1, w2, ..., wj-1)</emph>.</p>
+<h3>Mise en pratique</h3>
 
-<h3>Principe générale</h3>
+<strong>
+<p class="text-warning">À partir du corpus <code>corpus/wikinews</code>, évaluez les probabilités ci-après pour la chaîne <code>après qu'un hélicoptère</code> tirée du fichier <code>corpus/wikinews/txt/44389.txt</code> :</p>
+<ul class="text-warning">
+	<li><i>p(X=<code>couper</code>|W=<code>ès</code>,Y=<code> q</code>)</i></li>
+	<li><i>p(X=<code>ne pas couper</code>|W=<code>ès</code>,Y=<code> q</code>)</i></li>
+	<li><i>p(X=<code>couper</code>|W=<code>u'</code>,Y=<code>un</code>)</i></li>
+	<li><i>p(X=<code>ne pas couper</code>|W=<code>u'</code>,Y=<code>un</code>)</i></li>
+</ul>
+</strong>
 
-L'hypothèse de Markov consiste à dire que les probabilités de transitions ne dépendent que des n états précédents. En général, on se place à l'ordre n = 1, ce qui permet de ne considérer que l'état courant et l'état suivant.
-
-
-Principe d'indépendance
-
-<h3>Prédire le prochain caractère</h3>
-
-<h3>Probabilité d'apparition d'un caractère</h3>
-
-				<!-- SECTION 3 - VITERBI -->
-<a name="#viterbi"></a>
-<h2>Algorithme de Viterbi</h2>
+<p class="text-warning"><strong>Écrivez un script Python qui permette d'apprendre un modèle de segmentation à partir de vos annotations sur le corpus <code>wikinews</code> réalisées lors de la première séance, puis un autre qui permette de le mettre en application.</strong></p>
 
 				<!-- SECTION 4 - ÉVALUATION -->
-<a name="#eval"></a>
+<a name="eval"></a>
 <h2>Évaluation</h2>
 
+<p class="text-warning"><strong>Réalisez l'évaluation de votre tokeniseur en calculant sa précision et son rappel tel que vu précédemment.</strong></p>
+
+<p>Lorsque l'on travail avec un modèle statistique, il est tentant de réaliser l'évaluation sur les même corpus de référence que celui qui a servi à entraîner le modèle. En effet, la tâche d'annotation est longue et fastidieuse et l'on trouverait dommage de ne pas exploiter la totalité de ce corpus que l'on a annoté avec amour pour obtenir un modèle qui explose les scores. C'est une approche biaisée !</p>
+
+<p>Il est préférable de découper votre corpus en deux parties :</p>
+<ul>
+	<li>un corpus d'entraînement qui servira à apprendre le modèle,</li>
+	<li>un corpus de test qui servira à l'évaluer.</li>
+</ul>
+<p>Si vous souhaitez évaluer votre modèle sur tout le corpus, vous pouvez réaliser une évaluation croisée. Celle-ci consiste à découper votre corpus en <i>n</i> partitions et itérativement l'entraîner sur <i>n-1</i> partitions et l'évaluer sur la partition restante de sorte à l'évaluer sur toutes les partitions. Le résultat de l'évaluation correspond à la moyenne des évaluations obtenus à chaque itération.</p>
+
+<p class="text-warning"><strong>Réalisez l'évaluation de votre tokeniseur en calculant sa précision et son rappel par évaluation croisée sur 4 partitions.</strong></p>
+
 				<!-- SECTION 5 - APPLICATION -->
-<a name="#eval"></a>
+<a name="application"></a>
 <h2>Mise en application</h2>
 
 <p>Maintenant que nous disposons d'un tokeniseur en mots digne de ce nom, nous allons pouvoir l'utiliser pour mettre en évidence <a href="http://fr.wikipedia.org/wiki/Loi_de_Zipf">la loi de Zipf</a>. La loi de Zipf est une observation empirique qui prévoit que dans un texte, la fréquence d'occurrence <emph>f(n)</emph> d'un mot soit liée à son rang <emph>n</emph> dans l'ordre des fréquences par une loi de la forme <emph>f(n) = K / n (K constante)</emph>. Tournée autrement : un texte est constitué de peu de mots très fréquents et de beaucoup de mots peu fréquents.</p>
 
-<p class="text-warning"><strong>Cherchez à observer pour des textes conséquents que vous pourrez trouver sur <a href="http://www.gutenberg.org/browse/languages/fr">le site du projet Gutenberg</a>.</strong></p>
+<p class="text-warning"><strong>Cherchez à observer la loi de Zipf à partir des textes présents dans le corpus Jules-Vernes : dessinez la courbe du nombre d'occurrence en fonction du rang.</strong></p>
+
+<a name="answer"></a>
+<dl>
+	<dt class="text-muted">Réponse</dt>
+	<dd class="text-muted">Dans le cas de <code>d'</code> et <code>hu</code>, il n'y a pas assez d'information pour prendre une décision. En effet, il pourrait soit s'agir de deux mots (<code>une once d'humanité</code>) ou bien d'un seul (<code>aujourd'hui</code>).</dd>
+</dl>
+
 
 			</div>
 		</div>
