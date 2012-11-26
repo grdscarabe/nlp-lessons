@@ -49,11 +49,11 @@ for i in range(1, min(50, len(content))):
 		estimate_fr *= epsilon
 
 print "Probability the text is in:"
-print "\tEnglish: %f" % estimate_en
-print "\tFrench: %f" % estimate_fr
+print "\tEnglish: %s" % estimate_en
+print "\tFrench: %s" % estimate_fr
 if estimate_en > estimate_fr:
 	print "English it is then!"
-elif estimate_en > estimate_fr:
+elif estimate_fr > estimate_en:
 	print "French it is then!"
 else:
 	print "Well... I don't know!"
