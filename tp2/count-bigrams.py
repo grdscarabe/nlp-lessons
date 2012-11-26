@@ -8,7 +8,7 @@ Exemple d'utilisation :
     python count-bigrams.py texte.txt resultat.csv
 """
 
-import codecs, sys
+import codecs, sys, operator
 
 # Lecture du fichier en entrée
 finput = codecs.open(sys.argv[1], "r", "utf-8")
@@ -31,5 +31,20 @@ fcsv = codecs.open(sys.argv[2], "w", "utf-8")
 for bigram,occ in bigrams.items():
 	fcsv.write("\"%s\",%d\n" % (bigram.replace("\"", "<quote>"),occ))
 fcsv.close()
+
+# Calcul des déciles
+sbigrams = sorted(bigrams.iteritems(), key=operator.itemgetter(1))
+total = sum([occ for bi,occ in sbigrams])
+accumulated = 0
+decile = 1
+deciles = {1: []}
+for bigram,occ in sbigrams:
+	accumulated += occ
+	deciles[decile].append( (bigram, occ, 100.*occ/total) )
+	if accumulated > (decile*total/10.):
+		decile += 1 # décile suivant
+		deciles[decile] = []
+for i,bigrams in zip(range(10), deciles.values()):
+	print "Decile %d contains %d bigrams" % (i+1, len(bigrams))
 
 
