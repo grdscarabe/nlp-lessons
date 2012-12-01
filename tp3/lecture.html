@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+	<meta charset="utf-8">
+	<title>TALN - TP 3 : Recherche d'information, Indexation.</title>
+	<!-- Bootstrap -->
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link href="../commons/css/bootstrap.min.css" rel="stylesheet" media="screen">
+	<link href="../commons/css/bootstrap-responsive.css" rel="stylesheet">
+	<style>
+		.sidenav {
+			width: 240px;
+			margin: 30px 0pt 0pt;
+			padding: 0pt;
+			background-color: rgb(255,255,255);
+			border-radius: 6px 6px 6px 6px;
+			box-shadow: 0pt 1px 4px rgba(0,0,0,0.067);
+		}
+		.sidenav > li {
+			line-height: 20px;
+		}
+		.sidenav > li > a {
+			display: block;
+			margin: 0pt 0pt -1px;
+			padding: 8px 14px;
+			border: 1px solid rgb(229,229,229);
+		}
+		.sidenav .icon-chevron-right {
+			float: right;
+			margin-top: 2px;
+			margin-right: -6px;
+			opacity: 0.25;
+		}
+		.footer {
+			padding: 70px 0pt;
+			margin-top: 70px;
+			border-top: 1px solid rgb(229,229,229);
+			background-color: rgb(245,245,245);
+		}
+	</style>
+</head>
+<body data-spy="scroll" data-target=".navbar">
+	<div class="container-fluid">
+		<h1>TALN - TP 3 : Recherche d'information, Indexation.</h1>
+		<div class="row-fluid">
+			<div class="span3">
+				<!--Sidebar content-->
+				<ul class="nav nav-list sidenav affix-top" data-spy="affix" data-offset-top="50">
+					<li><a href="#intro">
+						<i class="icon-chevron-right"></i>
+						Fondamentaux de l'indexation
+					</a></li>
+					<li><a href="#brute">
+						<i class="icon-chevron-right"></i>
+						Recherche en texte brute
+					</a></li>
+					<li><a href="#equivalences">
+						<i class="icon-chevron-right"></i>
+						Classes d'équivalences
+					</a></li>
+					<li><a href="#ponderation">
+						<i class="icon-chevron-right"></i>
+						Pondérations
+					</a></li>
+					<li><a href="#application">
+						<i class="icon-chevron-right"></i>
+						Mise en application
+					</a></li>
+				</ul>
+			</div>
+			<div class="span7">
+
+				<!-- SYNOPSIS -->
+<p class="lead">L'objectif de cette séance est d'intégrer les principes fondamentaux de l'indexation de documents pour la <abbr title="Recherche d'Information">RI</abbr> : choix des mots à indexer et classes d'équivalence.</p>
+
+				<!-- SECTION 1 - FONDAMENTAUX -->
+<a name="intro"></a>
+<h2>Fondamentaux de l'indexation</h2>
+
+<p>En <abbr title="Recherche d'Information">RI</abbr>, la phase d'indexation est l'étape qui consiste à enregistrer un document dans le système de sorte qu'il puisse être retourné à l'utilisateur s'il est pertinent par rapport à sa requête.</p>
+
+<p>Wikipedia distingue deux types d'indexation :</p>
+<blockquote>
+<p>L’<em class="text-info">indexation d'un texte</em> consiste à repérer dans celui-ci certains mots ou expressions particulièrement significatifs (appelés termes) dans un contexte donné, afin de créer un index terminologique.</p>
+<p>L’<em class="text-info">indexation automatique de documents</em> est un ensemble de techniques au croisement de l'informatique et des Sciences de l'information et des bibliothèques qui permettent de repérer des éléments significatifs dans des documents numériques comme des documents textuels, des pages web, etc. Elle est notamment utilisée par les moteurs de recherche.</p>
+<small><a href="http://fr.wikipedia.org/wiki/Indexation">Wikipedia</a></small>
+</blockquote>
+
+<p>La deuxième définition est celle à laquelle nous nous intéressons. Nous reviendrons toutefois plus tard sur la première qui est extrêmement pertinente pour certains types de documents écrits dans des langues dites de <em>spécialités</em> (documentations techniques, textes de lois, ...).</p>
+
+<p>Plus prosaïquement, l'indexation d'un document revient à introduire ledit document dans un index (ou à créer cet index s'il n'existe pas). Un index est une liste de descripteurs (des mots ou des expressions dans notre cas) auxquels sont associés des documents qui renvoient vers ledit descripteur. L'index est en général une structure de données de type <em class="text-info">index inversé</em> qui associe à du contenu sa position.</p>
+
+				<!-- SECTION 2 - TEXTE BRUTE -->
+<a name="brute"></a>
+<h2>Recherche en texte brute</h2>
+
+<p>Une première indexation quelque peu naïve consisterait à construire un index inversé des mots tels qu'ils apparaîssent dans le texte, à la façon du listing suivant :</p>
+
+<pre class="prettyprint linenum">
+"art"        {D1, D2}
+"plaire"     {D1}
+"est"        {D1}
+"tromper"    {D1}
+"nous"       {D2}
+"avons"      {D2}
+"afin"       {D2}
+"pas"        {D2}
+"mourir"     {D2}
+"vérité"     {D2}
+</pre>
+
+<p>La structure de données <a href="http://docs.python.org/2/tutorial/datastructures.html#dictionaries">dictionnaire de Python</a> est parfaitement adapté à l'exercice. De plus, lors des séances précédents vous avez mis au point un tokeniseur en mots que vous pouvez directement réutiliser ici.</p>
+
+<p class="text-warning"><strong>Écrivez un script python permettant de construire un index inversé des mots de fichiers textes passés en paramètre puis faites le tourner sur le corpus <code>wikinews</code>. Réalisez quelques requêtes sur l'index.</strong></p>
+
+				<!-- SECTION 3 - CLASSES D'ÉQUIVALENCE -->
+<a name="equivalences"></a>
+<h2>Classes d'équivalences</h2>
+
+<p>Un rapide coup d'œil sur l'index construit à la section précédente montre qu'un certain nombre d'entrées mériteraient d'être regroupées. C'est le cas par exemple pour les mots : <em>apportait, apporte, apporter, apporterait, apportée</em>. Intuitivement, ces mots semblent sémantiquement équivalents : ils portent plus ou moins le même sens et il y a forte à parier qu'un utilisateur qui rechercherait un document avec <em>apporte</em> serait tout aussi intéressé par un autre document qui contiendrait le mot <em>apporté</em>.</p>
+
+<p>Les classes d'équivalences servent ce besoin. Leur principe est simple : regrouper sous une même entrée plusieurs entrées de l'index qui sont sémantiquement équivalentes. Bien sûr les faits sont bien plus ingrâts, il est extrêmement difficile de savoir si des mots sont sémantiquement équivalents au sein d'un texte et d'autant plus au sein de différents documents.</p>
+
+<p>Une approximation courante de l'équivalence sémantique est de construire des classes d'équivalence regroupant des mots ayant la même racine. L'idée est que la racine porte un sens général commun à tous les mots qui en dérivent.</p>
+
+				<!-- SECTION 4 - PONDÉRATIONS -->
+<a name="ponderation"></a>
+<h2>Pondérations</h2>
+
+				<!-- SECTION 5 - APPLICATION -->
+<a name="application"></a>
+<h2>Mise en application</h2>
+
+<p class="text-warning"><strong>Indexez la totalité du corpus Wikinews à votre disposition et tentez quelques recherches dans votre index.</strong></p>
+
+			</div>
+		</div>
+	</div>
+	<footer class="footer">
+		<div class="container">
+			<div class="span8">
+				<dl>
+					<dt>Corpus, code, ...</dt>
+					<dd><a href="https://github.com/grdscarabe/nlp-lessons">https://github.com/grdscarabe/nlp-lessons</a></dd>
+					<dt>Lectures</dt>
+					<dd><a href="http://www.fabienpoulard.info">Blog de l'auteur</a></dd>
+				</dl>
+			</div>
+			<div class="span3">
+				<address>
+					<strong>Fabien Poulard</strong><br>
+					Dictanova SAS<br>
+					2, chemin de la Houssinière<br/>
+					44300 Nantes</br>
+					<a href="mailto:fpoulard@dictanova.com">fpoulard@dictanova.com</a>
+				</address>
+			</div>
+		</div>
+	</footer>
+	<!-- JS -->
+	<script src="http://code.jquery.com/jquery-latest.js"></script>
+	<script src="../commons/js/bootstrap.min.js"></script>
+</body>
+</html>
+
+
