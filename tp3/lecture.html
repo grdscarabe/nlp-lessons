@@ -123,9 +123,149 @@
 
 <p>Une approximation courante de l'équivalence sémantique est de construire des classes d'équivalence regroupant des mots ayant la même racine. L'idée est que la racine porte un sens général commun à tous les mots qui en dérivent.</p>
 
+<h3>Un peu de racinisation</h3>
+
+<p>Comme vous l'avez vu en cours, l'algorithme de Porter permet de retrouver la racine d'un mot en appliquant itérativement diverses règles morphologiques basées sur les suffixes.</p>
+
+<p><abbr title="Natural Language ToolKit">NLTK</abbr> propose une implémentation de l'algorithme de Porter que vous pouvez retrouver sur <a href="http://nltk.org/_modules/nltk/stem/porter.html">cette page</a>. Allez jeter un œil à cette page et observez comment l'algorithme a été implémenté.</p>
+
+<p>L'algorithme de Porter a été originellement développé pour l'anglais. Il existe toutefois une implémentation multilingue de racinisation basée sur les principes de Porter : <code>snowball</code>. <abbr title="Natural Language ToolKit">NLTK</abbr> en propose <a href="http://nltk.org/_modules/nltk/stem/snowball.html#FrenchStemmer">une implémentation pour le français</a>.</p>
+
+<p class="text-warning"><strong>Installez <abbr title="Natural Language ToolKit">NLTK</abbr> localement sur votre machine en suivant <a href="http://nltk.org/install.html">ces indications</a>.</strong></p>
+
+<div class="accordion" id="note-ntlk-setup">
+  <div class="accordion-group">
+    <div class="accordion-heading">
+      <a class="accordion-toggle" data-toggle="collapse" data-parent="#note-nltk-setup" href="#collapseOne">
+        <i class="icon-question-sign"> </i> Détails sur l'installation de <abbr title="Natural Language ToolKit">NLTK</abbr>
+      </a>
+    </div>
+    <div id="collapseOne" class="accordion-body collapse">
+      <div class="accordion-inner">
+        <p>Il se peut que l'installation soit rendue compliquée voir impossible par l'absence de certains modules. Pour faire court, il reste envisageable d'installer localement les archives.</p>
+        <p>Téléchargez l'archive contenant la distribution <abbr title="Natural Language ToolKit">NLTK</abbr> dans un répertoire dédié.</p>
+        <pre class="prettyprint linenum">
+$ mkdir ~/python-libs
+$ cd ~/python-libs
+$ wget http://pypi.python.org/packages/source/n/nltk/nltk-2.0.4.tar.gz
+--2012-12-02 23:25:11--  http://pypi.python.org/packages/source/n/nltk/nltk-2.0.4.tar.gz
+Résolution de pypi.python.org (pypi.python.org)... 140.211.10.73
+Connexion vers pypi.python.org (pypi.python.org)|140.211.10.73|:80...connecté.
+requête HTTP transmise, en attente de la réponse...200 OK
+Longueur: 955978 (934K) [application/octet-stream]
+Sauvegarde en : «nltk-2.0.4.tar.gz»
+
+100%[======================================>] 955 978     21,0K/s   ds 39s     
+
+2012-12-02 23:25:50 (24,1 KB/s) - «nltk-2.0.4.tar.gz» sauvegardé [955978/955978]
+        </pre>
+        <p>Extrayez le contenu de l'archive et créez un lien symbolique vers le module <code>nltk-2.0.4/nltk</code>.</p>
+        <pre class="prettyprint linenum">
+$ tar -xzvf nltk-2.0.4.tar.gz
+...
+nltk-2.0.4/javasrc/org/nltk/mallet/CRFInfo.java
+nltk-2.0.4/javasrc/org/nltk/mallet/RunCRF.java
+nltk-2.0.4/javasrc/org/nltk/mallet/TrainCRF.java
+$ ln -s nltk-2.0.4/nltk .
+        </pre>
+        <p>Déclarez la variable d'environnement <code>PYTHONPATH</code> et faites la pointer vers le répertoire contenant le module.</p>
+        <pre class="prettyprint linenum">
+$ export PYTHONPATH=$PYTHONPATH:~/python-libs/
+        </pre>
+        <p>Vérifiez que l'installation fonctionne en important le module dans une console python.</p>
+        <pre class="prettyprint linenum">
+$ python
+Python 2.7.3rc2 (default, Apr 22 2012, 22:30:17) 
+[GCC 4.6.3] on linux2
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import nltk
+>>>
+        </pre>
+        <p>Afin de conserver cette configuration après un redémarrage, ajoutez la ligne <code>export PYTHONPATH=$PYTHONPATH:~/python-libs/</code> dans votre fichier <code>~/.bashrc</code>.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p>Une fois le module <abbr title="Natural Language ToolKit">NLTK</abbr> installé, expérimentez le racinisateur pour le français. Évaluez sa pertinence pour différents mots du corpus.</p>
+
+<pre class="prettyprint linenum">
+>>> from nltk.stem.snowball import FrenchStemmer
+>>> stemmer = FrenchStemmer()
+>>> help(stemmer)
+>>> stemmer.stem("racinisation")
+u'racinis'
+>>> stemmer.stem("engouement")
+u'engou'
+>>> stemmer.stem(u"étais")
+u'\xe9tais'
+>>> stemmer.stem(u"Premièrement")
+u'premi'
+</pre>
+
+<h3>Indexation</h3>
+
+<p>La racinisation lors de la phase d'indexation peut être exclusive ou non : soit l'on indexe uniquement les racines des mots, soit l'on indexe les racines et les formes rencontrées dans le texte.</p>
+
+<p class="text-warning"><strong>Reprenez votre script d'indexation écrit précédemment et modifiez-le pour tester l'impact de la racinisation. Profitez-en pour filtrer automatiquement les mots outils qui n'ont pas d'intérêt pour votre index.</strong></p>
+
 				<!-- SECTION 4 - PONDÉRATIONS -->
 <a name="ponderation"></a>
 <h2>Pondérations</h2>
+
+<p>Si vous indexez un grand nombre de documents, vos requêtes raméneront mécaniquement un grand nombre de documents. Il est nécessaire de pouvoir ordonner les documents retournés selon leur pertinence, de sorte à ne proposer à l'utilisateur que les 10 plus pertinents par exemple.</p>
+
+<p>Une première forme de pondération pourrait s'effectuer par requête : le système donnerait le score le plus élevé aux documents qui contiennent le plus de mots de la requête.</p>
+
+<p class="text-warning">Modifiez la fonction <code>query()</code> pour donner un score aux documents basé sur le nombre de mots de la requête qu'ils contiennent.</p>
+
+<p>Malheureusement l'approche précédente n'améliorera que marginalement les résultats car d'expérience les utilisateurs soumettent des requêtes contenant un nombre limité de mots clés. Il est donc nécessaire de trouver un autre moyen d'ordonner les résultats.</p>
+
+<p><a href="http://en.wikipedia.org/wiki/Gerard_Salton">G. Salton</a>, un des fondateurs de la <abbr title="Recherche d'Information">RI</abbr> moderne a notamment introduit la mesure de <abbr title="Term Frequency per Inverse Document Frenquency">tf.idf</abbr>.</p>
+
+<blockquote>
+<p>Le TF-IDF est une méthode de pondération souvent utilisée en recherche d'information et en particulier dans la fouille de textes. Cette mesure statistique permet d'évaluer l'importance d'un terme contenu dans un document, relativement à une collection ou un corpus.</p>
+<a href="http://fr.wikipedia.org/wiki/TF-IDF">Wikipedia</a>
+</blockquote>
+
+<p>Le calcul du <abbr title="Term Frequency per Inverse Document Frenquency">tf.idf</abbr> nécessite de mener l'indexation en deux temps. Dans un premier temps, les mots sont comptés et ajoutés dans l'index tandis que l'on calcule leur <em>document frequency</em>. Dans un second temps, le score de chaque mot pour chaque document est mis à jour en multipliant la fréquence du mot dans le document par le logarithme de l'inverse du <em>document frequency</em> du mot.</p>
+
+<p>Voici une proposition de framework pour ce calcul en deux temps :</p>
+
+<pre class="prettyprint linenum">
+index = {}
+df = {}
+nbdocs = 0
+# première passe
+for doc in documents:
+  nbdocs += 1
+  localindex = {}
+  nbwords = 0
+  for word in tokenize(doc):
+    nbwords += 1
+    # calcule du nombre d'occurrences
+    if not localindex.has_key(word):
+      localindex[word] = 1
+      # maj du df
+      if not df.has_key(word):
+        df[word] = 1
+      else:
+        df[word] += 1
+    else:
+      index[word] += 1
+  # maj de l'index avec le tf
+  for w,occ in localindex.items():
+    if not index.has_key(w):
+      index[w] = []
+    index.append( (doc, 1.*occ/nbwords) )
+# seconde passe
+for w,entries in index.items():
+  for i in range(len(entries)):
+    doc,tf = entries[i]
+    entries[i] = (doc, tf, tf * math.log(1. * nbdocs / df[w]))
+</pre>
+
+<p class="text-warning"><strong>Appropriez-vous ce code puis modifiez votre script d'indexation et vos fonctions de requêtage pour tenir compte de la pondération <abbr title="Term Frequency per Inverse Document Frenquency">tf.idf</abbr>.</strong></p>
 
 				<!-- SECTION 5 - APPLICATION -->
 <a name="application"></a>
