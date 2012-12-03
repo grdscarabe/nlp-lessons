@@ -172,6 +172,10 @@ $ ln -s nltk-2.0.4/nltk .
         <pre class="prettyprint linenum">
 $ export PYTHONPATH=$PYTHONPATH:~/python-libs/
         </pre>
+        <p><i class="icon-warning-sign"> </i>Si vous avez une erreur concernant une variable non liée, supprimez simplement la référence à <code>$PYTHONPATH</code>.</p>
+        <pre class="prettyprint linenum">
+$ export PYTHONPATH=~/python-libs/
+        </pre>
         <p>Vérifiez que l'installation fonctionne en important le module dans une console python.</p>
         <pre class="prettyprint linenum">
 $ python
@@ -182,6 +186,26 @@ Type "help", "copyright", "credits" or "license" for more information.
 >>>
         </pre>
         <p>Afin de conserver cette configuration après un redémarrage, ajoutez la ligne <code>export PYTHONPATH=$PYTHONPATH:~/python-libs/</code> dans votre fichier <code>~/.bashrc</code>.</p>
+      </div>
+    </div>
+  </div>
+  <div class="accordion-group">
+    <div class="accordion-heading">
+      <a class="accordion-toggle" data-toggle="collapse" data-parent="#note-nltk-setup" href="#collapseTwo">
+        <i class="icon-question-sign"> </i> Détails sur l'installation de <abbr title="Python for Yet another Markup Language">PyYaml</abbr>
+      </a>
+    </div>
+    <div id="collapseTwo" class="accordion-body collapse">
+      <div class="accordion-inner">
+        <p><abbr title="Natural Language ToolKit">NLTK</abbr> dépend d'un autre module Python : <a href="http://pyyaml.org/">PyYaml</a>. Vous pouvez l'installer en suivant les mêmes instructions que précédemment.</p>
+      <pre class="prettyprint linenum">
+$ cd ~/python-libs/
+$ wget http://pyyaml.org/download/pyyaml/PyYAML-3.10.tar.gz
+...
+$ tar -xzvf PyYAML-3.10.tar.gz
+...
+$ ln -s PyYAML-3.10/lib/yaml .
+      </pre>
       </div>
     </div>
   </div>
