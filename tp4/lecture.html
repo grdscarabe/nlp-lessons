@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+	<meta charset="utf-8">
+	<title>TALN - TP 4 : Recherche d'information, Indexation avancée.</title>
+	<!-- Bootstrap -->
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link href="../commons/css/bootstrap.min.css" rel="stylesheet" media="screen">
+	<link href="../commons/css/bootstrap-responsive.css" rel="stylesheet">
+	<style>
+		.sidenav {
+			width: 240px;
+			margin: 30px 0pt 0pt;
+			padding: 0pt;
+			background-color: rgb(255,255,255);
+			border-radius: 6px 6px 6px 6px;
+			box-shadow: 0pt 1px 4px rgba(0,0,0,0.067);
+		}
+		.sidenav > li {
+			line-height: 20px;
+		}
+		.sidenav > li > a {
+			display: block;
+			margin: 0pt 0pt -1px;
+			padding: 8px 14px;
+			border: 1px solid rgb(229,229,229);
+		}
+		.sidenav .icon-chevron-right {
+			float: right;
+			margin-top: 2px;
+			margin-right: -6px;
+			opacity: 0.25;
+		}
+		.footer {
+			padding: 70px 0pt;
+			margin-top: 70px;
+			border-top: 1px solid rgb(229,229,229);
+			background-color: rgb(245,245,245);
+		}
+	</style>
+</head>
+<body data-spy="scroll" data-target=".navbar">
+	<div class="container-fluid">
+		<h1>TALN - TP 4 : Recherche d'information, Indexation avancée.</h1>
+		<div class="row-fluid">
+			<div class="span3">
+				<!--Sidebar content-->
+				<ul class="nav nav-list sidenav affix-top" data-spy="affix" data-offset-top="50">
+					<li><a href="#postagging">
+						<i class="icon-chevron-right"></i>
+						Étiquetage des rôles grammaticaux
+					</a></li>
+					<li><a href="#substantifs">
+						<i class="icon-chevron-right"></i>
+						Indexation des substantifs
+					</a></li>
+					<li><a href="#terms">
+						<i class="icon-chevron-right"></i>
+						Indexation de termes
+					</a></li>
+					<li><a href="#keyphrases">
+						<i class="icon-chevron-right"></i>
+						Expressions clés
+					</a></li>
+					<li><a href="#application">
+						<i class="icon-chevron-right"></i>
+						Mise en application
+					</a></li>
+				</ul>
+			</div>
+			<div class="span7">
+
+				<!-- SYNOPSIS -->
+<p class="lead">L'objectif de cette séance est d'aller au-delà de l'indexation lexicale naïve pour se concentrer sur les éléments qui expriment le sens des textes.</p>
+
+				<!-- SECTION 1 - POS TAGGING -->
+<a name="postagging"></a>
+<h2>Étiquetage des rôles grammaticaux</h2>
+
+<h3>Intuition</h3>
+
+<p>L'intuition derrière les rôles grammaticaux est que les mots de même rôle partageront des contextes similaires.</p>
+
+<p class="text-warning"><strong>Écrire un script permettant d'extraire les contextes d'un mot donné, puis de rechercher les mots ayant un contexte similaire.</strong></p>
+
+<h3>Annotation de corpus</h3>
+
+<h3>Entraînement d'un modèle</h3>
+
+<a href="http://streamhacker.com/2011/03/21/training-part-speech-taggers-nltk-trainer/">Tutoriel</a>
+
+<h3>Évaluation du modèle</h3>
+
+				<!-- SECTION 2 - SUBSTANTIFS -->
+<a name="substantifs"></a>
+<h2>Indexation des substantifs</h2>
+
+				<!-- SECTION 3 - TERMS -->
+<a name="terms"></a>
+<h2>Indexation de termes</h2>
+
+<h3>Motifs terminologiques</h3>
+
+<h3>Normalisation des termes</h3>
+
+<h3>Indexation</h3>
+
+				<!-- SECTION 4 - KEY PHRASES -->
+<a name="keyphrases"></a>
+<h2>Expressions clés</h2>
+
+<h3>Approche à base de n-grammes</h3>
+
+<h3>Approche terminologique</h3>
+
+
+				<!-- SECTION 5 - APPLICATION -->
+<a name="application"></a>
+<h2>Mise en application</h2>
+
+<p class="text-warning"><strong>Indexez la totalité du corpus Wikinews à votre disposition et tentez quelques recherches dans votre index.</strong></p>
+
+			</div>
+		</div>
+	</div>
+	<footer class="footer">
+		<div class="container">
+			<div class="span8">
+				<dl>
+					<dt>Ressources</dt>
+					<dd>
+						<ul>
+							<li><a href="http://nltk.googlecode.com/svn/trunk/doc/book/ch05.html">Chapitre du livre NLTK sur l'étiquetage</a></li>
+							<li>Billet de streamhacker sur le <a href="http://streamhacker.com/2011/03/21/training-part-speech-taggers-nltk-trainer/">pos tagging</a> et le <a href="http://streamhacker.com/2008/12/29/how-to-train-a-nltk-chunker/">chunking</a></li>
+						</ul>
+					</dd>
+					<dt>Corpus, code, ...</dt>
+					<dd><a href="https://github.com/grdscarabe/nlp-lessons">https://github.com/grdscarabe/nlp-lessons</a></dd>
+					<dt>Lectures</dt>
+					<dd><a href="http://www.fabienpoulard.info">Blog de l'auteur</a></dd>
+				</dl>
+			</div>
+			<div class="span3">
+				<address>
+					<strong>Fabien Poulard</strong><br>
+					Dictanova SAS<br>
+					2, chemin de la Houssinière<br/>
+					44300 Nantes</br>
+					<a href="mailto:fpoulard@dictanova.com">fpoulard@dictanova.com</a>
+				</address>
+			</div>
+		</div>
+	</footer>
+	<!-- JS -->
+	<script src="http://code.jquery.com/jquery-latest.js"></script>
+	<script src="../commons/js/bootstrap.min.js"></script>
+</body>
+</html>
+
+
