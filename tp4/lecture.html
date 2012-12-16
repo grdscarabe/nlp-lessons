@@ -79,11 +79,19 @@
 
 <h3>Intuition</h3>
 
+<p>Un étiqueteur morpho-syntaxique est un outil permettant d’assigner automatiquement à chacun des mots (au sens tokens) d’un texte, sa catégorie grammaticale (e.g. déterminant, adjectif, nom). Un exemple de phrase tokenisée et étiquetée en catégories morpho-syntaxiques est présentée ci-dessous :</p>
+
+<pre class="prettyprint">
+“J’ adore les sushis .” → “J’/CL adore/V les/D sushis/N ./.”
+</pre>
+
 <p>L'intuition derrière les rôles grammaticaux est que les mots de même rôle partageront des contextes similaires.</p>
 
 <p class="text-warning"><strong>Écrire un script permettant d'extraire les contextes d'un mot donné, puis de rechercher les mots ayant un contexte similaire.</strong></p>
 
 <h3>Annotation de corpus</h3>
+
+<p>La bibliothèque nltk contient plusieurs méthodes d’étiquetage morpho-syntaxique mais elle ne dispose que de modèles pour la langue anglaise.</p>
 
 <h3>Entraînement d'un modèle</h3>
 
@@ -108,6 +116,43 @@
 				<!-- SECTION 4 - KEY PHRASES -->
 <a name="keyphrases"></a>
 <h2>Expressions clés</h2>
+
+<p>Les keyphrases, ou termes clés en français, sont des termes permettant de caractériser le contenu d’un document. Considéré comme un bref résumé, ils permettent d’organiser et de retrouver plus facilement les documents dans une collection. De nombreuses applications en TALN peuvent également bénéficier de la présence de keyphrases, e.g. le résumé automatique, l’indexation ou les systèmes de questions-réponses. Cependant, très peu de documents ont un ensemble de keyphrases associé et l’annotation manuelle de grandes collections serait bien trop coûteuse. La problématique de l’extraction automatique keyphrases a donc naturellement émergée et de nombreux travaux ont été publiés à ce sujet.</p
+
+<p>Les approches proposées par la communauté peuvent être réparties en deux catégories : supervisées et non-supervisées. Les approches supervisées considèrent l’extraction de keyphrases comme une problème de classification binaire (keyphrase ou pas keyphrase). Ce type d’approche est connu pour donner les meilleurs résultats mais nécessite un ensemble de données annotées pour l’entraînement. De plus, les performances des modèles appris sont dépendantes de la qualité de l’annotation, de la quantité de données et du domaine traité.</p>
+
+<p>Pour éviter ses problèmes, de nombreuses méthodes non-supervisées ont été proposées. Ces dernières utilisent divers critères statistiques et/ou linguistiques pour évaluer l’importance d’un terme vis-à-vis du document, e.g. tf × idf, TextRank, information mutuelle, distance dans une ontologie.</p>
+
+<p>Les différentes étapes d’une méthode baseline pour l’extraction de keyphrases sont présentées ci-dessous :</p>
+<ol>
+	<li>Pré-traitement du document
+	<ul>
+		<li>Découpage du texte en phrases</li>
+		<li>Tokenization</li>
+		<li>Étiquetage morphosyntaxique</li>
+	</ul>
+	</li>
+	<li>Pondération des mots
+	<ul>
+		<li>Calcul du scores des mots, e.g. tf × idf</li>
+	</ul>
+	</li>
+	<li>Génération des termes candidats
+	<ul>
+		<li>Utilisation de patrons syntaxiques, e.g. (Adj∗)(NPP|NC)+</li>
+	</ul>
+	</li>
+	<li>Pondération et ordonnancement des termes candidats
+	<ul>
+		<li>Calcul du score des termes, e.g. mot∈terme score(mot)</li>
+		<li>Tri des termes par ordre décroissant de score</li>
+	</ul>
+	</li>
+	<li>Génération des keyphrases et évaluation
+	<ul>
+		<li>Sélection des n-meilleurs termes candidats</li>
+	</ul>
+</ol>
 
 <h3>Approche à base de n-grammes</h3>
 
