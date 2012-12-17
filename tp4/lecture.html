@@ -85,19 +85,45 @@
 “J’ adore les sushis .” → “J’/CL adore/V les/D sushis/N ./.”
 </pre>
 
-<p>L'intuition derrière les rôles grammaticaux est que les mots de même rôle partageront des contextes similaires.</p>
+<p>L'intuition mise en œuvre par les systèmes d'étiquetage des rôles grammaticaux est que les mots de même rôle partagent des contextes similaires. En d'autres termes, dis-moi quels sont tes voisins, je te dirai qui tu es !</p>
 
-<p class="text-warning"><strong>Écrire un script permettant d'extraire les contextes d'un mot donné, puis de rechercher les mots ayant un contexte similaire.</strong></p>
+<p class="text-warning"><strong>Écrire un script permettant d'extraire les contextes d'un mot donné, puis de rechercher les mots ayant un contexte similaire. Le corpus wikinews ne sera pas suffisant</strong></p>
 
 <h3>Annotation de corpus</h3>
 
-<p>La bibliothèque nltk contient plusieurs méthodes d’étiquetage morpho-syntaxique mais elle ne dispose que de modèles pour la langue anglaise.</p>
+<p>La bibliothèque nltk contient plusieurs méthodes d’étiquetage morpho-syntaxique mais elle ne dispose que de modèles pour la langue anglaise. Il va donc nous falloir construire une ressource pour le français...</p>
 
-<h3>Entraînement d'un modèle</h3>
+<p>L'une des solutions consisterait à vous faire annoter les rôles grammaticaux sur un corpus en français tel que le wikinews. Ce type d'annotation est cependant assez technique et relève plutôt du travail des linguistes.</p>
 
-<a href="http://streamhacker.com/2011/03/21/training-part-speech-taggers-nltk-trainer/">Tutoriel</a>
+<p>Nous allons utiliser le corpus <em><a href="https://gforge.inria.fr/frs/download.php/31734/sequoia-corpus-v4.0.tgz">séquoia</a></em> qui est un corpus arboré pour le français. Il va cependant être nécessaire dans un premier temps de transformer l'annotation arborée en un étiquetage <code>mot/pos</code>.</p>
 
-<h3>Évaluation du modèle</h3>
+<pre class="prettyprint">
+line = u"( (SENT (NP-SUJ (DET Ce) (NC document)) (VN (V est)) (NP-ATS (DET un) (NC résumé) (PP (P+D du) (NP (NC rapport) (AP (ADJ européen)) (AP (ADJ public)) (PP (P d') (NP (NC évaluation))) (PONCT -LRB-) (NP (NC EPAR)) (PONCT -RRB-)))) (PONCT .)))"
+from nltk.tree import Tree
+sent = Tree.parse(line)
+tokens = [u"%s/%s"%(t,p) for t,p in sent.pos() if not t in ["-LRB-", "-RRB-"]]
+u" ".join(tokens)
+</pre>
+
+<h3>Entraînement d'un étiqueteur à unigrammes</h3>
+
+<p>Le principe d'un étiqueteur à unigrammes est d'associer à un mot sa catégorie grammaticale la plus probable. Un tel étiqueteur est extrêmement naïf et n'utilise nullement le contexte du mot.</p>
+
+<p>NLTK propose une implémentation d'étiqueteur à unigrammes : <code>nltk.UnigramTagger</code>. Celui-ci doit être entraîné à partir d'une liste de phrases dont les mots sont étiquetés. Chaque phrase est représentée comme une liste de tuples <code>(mot, étiquette)</code>. La fonction <code>nltk.tag.str2tuple</code> permet de convertir nos annotations <code>mot/étiquette</code> en de tels tuples.</p>
+
+<pre class="prettyprint">
+import nltk
+sentstr = u"Ce/DET document/NC est/V un/DET résumé/NC du/P+D rapport/NC européen/ADJ public/ADJ d'/P évaluation/NC EPAR/NC ./PONCT"
+senttuple = [nltk.tag.str2tuple(tok) for tok in sentstr.split()]
+tagger = nltk.UnigramTagger([senttuple])
+tagger.tag(u"Ce document est un résumé du rapport européen public d' évaluation EPAR .".split())
+</pre>
+
+<p class="text-warning"><strong>Entraînez un étiqueteur à unigrammes sur le corpus séquoia. Testez-le sur quelques phrases.</strong></p>
+
+<h3>Évaluation d'un étiqueteur à unigrammes</h3>
+
+<p class="text-warning"><strong>Étudiez le script <code>train-unigram-on-sequoia.py</code>, puis utilisez-le pour évaluer la qualité de l'étiqueteur à unigrammes sur le corpus séquoia.</strong></p>
 
 				<!-- SECTION 2 - SUBSTANTIFS -->
 <a name="substantifs"></a>
@@ -177,6 +203,7 @@
 						<ul>
 							<li><a href="http://nltk.googlecode.com/svn/trunk/doc/book/ch05.html">Chapitre du livre NLTK sur l'étiquetage</a></li>
 							<li>Billet de streamhacker sur le <a href="http://streamhacker.com/2011/03/21/training-part-speech-taggers-nltk-trainer/">pos tagging</a> et le <a href="http://streamhacker.com/2008/12/29/how-to-train-a-nltk-chunker/">chunking</a></li>
+							<li><a href="https://gforge.inria.fr/frs/download.php/31734/sequoia-corpus-v4.0.tgz">Séquoia : un corpus arboré pour le français<a/></li>
 						</ul>
 					</dd>
 					<dt>Corpus, code, ...</dt>
