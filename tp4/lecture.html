@@ -50,17 +50,9 @@
 						<i class="icon-chevron-right"></i>
 						Étiquetage des rôles grammaticaux
 					</a></li>
-					<li><a href="#substantifs">
-						<i class="icon-chevron-right"></i>
-						Indexation des substantifs
-					</a></li>
 					<li><a href="#terms">
 						<i class="icon-chevron-right"></i>
-						Indexation de termes
-					</a></li>
-					<li><a href="#keyphrases">
-						<i class="icon-chevron-right"></i>
-						Expressions clés
+						Indexation des termes clés
 					</a></li>
 					<li><a href="#application">
 						<i class="icon-chevron-right"></i>
@@ -125,65 +117,71 @@ tagger.tag(u"Ce document est un résumé du rapport européen public d' évaluat
 
 <p class="text-warning"><strong>Étudiez le script <code>train-unigram-on-sequoia.py</code>, puis utilisez-le pour évaluer la qualité de l'étiqueteur à unigrammes sur le corpus séquoia.</strong></p>
 
-				<!-- SECTION 2 - SUBSTANTIFS -->
-<a name="substantifs"></a>
-<h2>Indexation des substantifs</h2>
+<h3>Entraînement d'un étiqueteur de Brill</h3>
 
-				<!-- SECTION 3 - TERMS -->
+<p>L'entraînement d'un étiqueteur de Brill est extrêmement similaire dans le principe à celui de l'étiqueteur par unigrammes : utiliser des phrases déjà étiquetées manuellement pour construire le modèle. Cependant, le processus est un peu plus compliqué puisque l'étiqueteur de Brill travaille en deux phases : un premier étiquetage hors contexte puis la correction des étiquettes sur la base de règles contextuelles. L'apprentissage revient finalement à apprendre ces règles de correction.</p>
+
+<p>Dans NLTK, l'entraînement de l'étiqueteur de Brill nécessite :</p>
+<ul>
+	<li>un étiqueteur de référence pour la première passe : nous utiliserons l'étiqueteur par unigrammes.</li>
+	<li>des modèles de règles à apprendre basées sur l'exploitation du contexte.</li>
+</ul>
+
+<pre class="prettyprint">
+templates = [
+	# Context tag in a 1, 2 and 3 word window
+	SymmetricProximateTokensTemplate(ProximateTagsRule, (1,1)),
+	SymmetricProximateTokensTemplate(ProximateTagsRule, (2,2)),
+	SymmetricProximateTokensTemplate(ProximateTagsRule, (1,2)),
+	SymmetricProximateTokensTemplate(ProximateTagsRule, (1,3)),
+	# Context word in a 1, 2 and 3 word window
+	SymmetricProximateTokensTemplate(ProximateWordsRule, (1,1)),
+	SymmetricProximateTokensTemplate(ProximateWordsRule, (2,2)),
+	SymmetricProximateTokensTemplate(ProximateWordsRule, (1,2)),
+	SymmetricProximateTokensTemplate(ProximateWordsRule, (1,3)),
+	# Closest tag
+	ProximateTokensTemplate(ProximateTagsRule, (-1, -1), (1,1)),
+	# Closest word
+	ProximateTokensTemplate(ProximateWordsRule, (-1, -1), (1,1))
+]
+</pre>
+
+<p class="text-warning"><strong>Étudiez le script <code>train-brill-on-sequoia.py</code>, puis utilisez-le pour évaluer la qualité de l'étiqueteur de Brill sur le corpus séquoia.</strong></p>
+
+<p class="text-warning"><strong>Observez et comprenez les règles de correction retenues.</strong></p>
+
+				<!-- SECTION 3 - KEY PHRASES -->
 <a name="terms"></a>
-<h2>Indexation de termes</h2>
+<h2>Indexation des termes clés</h2>
 
-<h3>Motifs terminologiques</h3>
+<p>Les termes clés, ou <em>keyphrases</em>, sont des termes permettant de caractériser le contenu d’un document. Considéré comme un bref résumé, ils permettent d’organiser et de retrouver plus facilement les documents dans une collection. Ils sont extrêmement pertinents pour l'indexation car ils portent le sens du document.</p>
 
-<h3>Normalisation des termes</h3>
+<p>Les approches proposées par la communauté peuvent être réparties en deux catégories : supervisées et non-supervisées. Les approches supervisées donnent de meilleurs résultats mais nécessitent un ensemble de données annotées pour l’entraînement. Les méthodes non-supervisées utilisent divers critères statistiques et/ou linguistiques pour évaluer l’importance d’un terme vis-à-vis du document : tf × idf, TextRank, information mutuelle, distance dans une ontologie...</p>
 
-<h3>Indexation</h3>
-
-				<!-- SECTION 4 - KEY PHRASES -->
-<a name="keyphrases"></a>
-<h2>Expressions clés</h2>
-
-<p>Les keyphrases, ou termes clés en français, sont des termes permettant de caractériser le contenu d’un document. Considéré comme un bref résumé, ils permettent d’organiser et de retrouver plus facilement les documents dans une collection. De nombreuses applications en TALN peuvent également bénéficier de la présence de keyphrases, e.g. le résumé automatique, l’indexation ou les systèmes de questions-réponses. Cependant, très peu de documents ont un ensemble de keyphrases associé et l’annotation manuelle de grandes collections serait bien trop coûteuse. La problématique de l’extraction automatique keyphrases a donc naturellement émergée et de nombreux travaux ont été publiés à ce sujet.</p
-
-<p>Les approches proposées par la communauté peuvent être réparties en deux catégories : supervisées et non-supervisées. Les approches supervisées considèrent l’extraction de keyphrases comme une problème de classification binaire (keyphrase ou pas keyphrase). Ce type d’approche est connu pour donner les meilleurs résultats mais nécessite un ensemble de données annotées pour l’entraînement. De plus, les performances des modèles appris sont dépendantes de la qualité de l’annotation, de la quantité de données et du domaine traité.</p>
-
-<p>Pour éviter ses problèmes, de nombreuses méthodes non-supervisées ont été proposées. Ces dernières utilisent divers critères statistiques et/ou linguistiques pour évaluer l’importance d’un terme vis-à-vis du document, e.g. tf × idf, TextRank, information mutuelle, distance dans une ontologie.</p>
-
-<p>Les différentes étapes d’une méthode baseline pour l’extraction de keyphrases sont présentées ci-dessous :</p>
+<p>Les différentes étapes d’une méthode baseline pour l’extraction de keyphrases sont :</p>
 <ol>
-	<li>Pré-traitement du document
-	<ul>
-		<li>Découpage du texte en phrases</li>
-		<li>Tokenization</li>
-		<li>Étiquetage morphosyntaxique</li>
-	</ul>
-	</li>
-	<li>Pondération des mots
-	<ul>
-		<li>Calcul du scores des mots, e.g. tf × idf</li>
-	</ul>
-	</li>
-	<li>Génération des termes candidats
-	<ul>
-		<li>Utilisation de patrons syntaxiques, e.g. (Adj∗)(NPP|NC)+</li>
-	</ul>
-	</li>
-	<li>Pondération et ordonnancement des termes candidats
-	<ul>
-		<li>Calcul du score des termes, e.g. mot∈terme score(mot)</li>
-		<li>Tri des termes par ordre décroissant de score</li>
-	</ul>
-	</li>
-	<li>Génération des keyphrases et évaluation
-	<ul>
-		<li>Sélection des n-meilleurs termes candidats</li>
-	</ul>
+	<li>Pré-traitement du document : découpage en phrases, en mots et étiquetage des rôles grammaticaux.</li>
+	<li>Pondération des mots (tf × idf)</li>
+	<li>Génération des termes candidats à l'aide de patrons syntaxiques</li>
+	<li>Pondération et ordonnancement des termes candidats</li>
+	<li>Sélection des n-meilleurs termes candidats</li>
 </ol>
 
-<h3>Approche à base de n-grammes</h3>
+<h3>Génération des termes candidats</h3>
 
-<h3>Approche terminologique</h3>
+<p>Précédemment, nous considérions tous les mots rencontrés comme pertinents. Cette approche relève plus du désespoir qu'autre chose. Maintenant que nous avons à disposition des outils plus pointus, nous pouvons être un peu plus sélectifs.</p>
 
+<p>Nous allons désormais nous concentrer sur :</p>
+<ul>
+	<li>Les noms et les verbes</li>
+	<li>Les motifs (Adj∗)(NPP|NC)+ et (NPP|NC)+(de|à)(NPP|NC)+</li>
+</ul>
+
+<p class="text-warning"><strong>Utilisez les briques mises au point précédemment pour extraire les termes candidats d'un texte.</strong></p>
+
+<h3>Pondération des termes candidats</h3>
+
+<p class="text-warning"><strong>Calculez le tf × idf des différents termes candidats extraits précédemment. Incorporez ce score à l'indexation.</strong></p>
 
 				<!-- SECTION 5 - APPLICATION -->
 <a name="application"></a>
